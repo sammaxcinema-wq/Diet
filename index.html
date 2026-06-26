@@ -14,11 +14,16 @@
         input[type="number"]::-webkit-outer-spin-button {
             opacity: 1;
         }
+        /* Custom scrollbar for meal cells */
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
     </style>
 </head>
 <body class="transition-colors duration-300">
     <div id="root"></div>
 
+    <!-- Dependencies -->
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -28,7 +33,7 @@
     <script type="text/babel">
         const { useState, useEffect, useRef, useCallback, useMemo } = React;
         const { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = Recharts;
-        const { ChevronLeft, ChevronRight, Search, Plus, Settings, Moon, Sun, Bell, Droplet, TrendingUp, Zap } = LucideReact;
+        const { Home, Calendar, BarChart3, Settings, LogOut, ChevronLeft, ChevronRight, Search, Plus, Moon, Sun, Bell, Droplet, TrendingUp, Zap, Menu, X } = LucideReact;
 
         // ----------------------------------------------------------------------
         // CONSTANTS
@@ -91,11 +96,13 @@
         }
 
         // ----------------------------------------------------------------------
-        // APP COMPONENT
+        // APP COMPONENT (with sidebar navigation)
         // ----------------------------------------------------------------------
         function DietPlannerApp() {
             const [user] = useState({ name: 'Sarah Johnson', avatar: '👤', email: 'sarah@example.com' });
             const [darkMode, setDarkMode] = useState(true);
+            const [sidebarOpen, setSidebarOpen] = useState(false);
+            const [currentTab, setCurrentTab] = useState('planner'); // 'dashboard' | 'planner' | 'insights'
             const [currentWeekStart, setCurrentWeekStart] = useState(getWeekStart(new Date()));
             const [meals, setMeals] = useState(initializeMeals());
             const [selectedDay, setSelectedDay] = useState(null);
@@ -105,7 +112,7 @@
             const [weight, setWeight] = useState(72);
             const [healthMetrics, setHealthMetrics] = useState({ calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 });
 
-            // NaN‑safe weight (Critical fix)
+            // NaN‑safe weight
             const lastValidWeight = useRef(72);
             const handleWeightChange = useCallback((rawValue) => {
                 const parsed = parseFloat(rawValue);
@@ -119,12 +126,11 @@
 
             const handleWaterChange = useCallback((val) => setWaterIntake(Math.min(8, Math.max(0, val))), []);
 
-            // Recalculate daily nutrition
+            // Daily nutrition
             useEffect(() => {
                 const todayKey = getDateKey(new Date());
                 const todayMeals = meals[todayKey] || {};
                 let totals = { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 };
-
                 Object.values(todayMeals).forEach(meal => {
                     if (Array.isArray(meal)) {
                         meal.forEach(food => {
@@ -136,7 +142,6 @@
                         });
                     }
                 });
-
                 setHealthMetrics(totals);
             }, [meals]);
 
@@ -169,43 +174,76 @@
             }, []);
 
             return (
-                <div className={`min-h-screen transition-colors duration-300 ${darkMode ? 'bg-slate-900 text-white' : 'bg-white text-slate-900'}`}>
-                    <Header user={user} darkMode={darkMode} onToggleDarkMode={() => setDarkMode(!darkMode)} />
+                <div className={`min-h-screen flex transition-colors duration-300 ${darkMode ? 'bg-slate-900 text-white' : 'bg-white text-slate-900'}`}>
+                    {/* Sidebar */}
+                    <Sidebar
+                        user={user}
+                        darkMode={darkMode}
+                        sidebarOpen={sidebarOpen}
+                        setSidebarOpen={setSidebarOpen}
+                        currentTab={currentTab}
+                        setCurrentTab={setCurrentTab}
+                        onToggleDarkMode={() => setDarkMode(!darkMode)}
+                    />
 
-                    <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <div className="lg:col-span-1 space-y-6">
-                                <GreetingCard user={user} darkMode={darkMode} />
-                                <NutritionCard metrics={healthMetrics} darkMode={darkMode} />
-                                <HealthMetricsCard
-                                    waterIntake={waterIntake}
-                                    weight={weight}
-                                    darkMode={darkMode}
-                                    onWaterChange={handleWaterChange}
-                                    onWeightChange={handleWeightChange}
-                                />
-                                <CalorieChart metrics={healthMetrics} darkMode={darkMode} />
-                            </div>
+                    {/* Main Content */}
+                    <div className="flex-1 flex flex-col">
+                        {/* Top Header */}
+                        <Header
+                            user={user}
+                            darkMode={darkMode}
+                            sidebarOpen={sidebarOpen}
+                            setSidebarOpen={setSidebarOpen}
+                            onToggleDarkMode={() => setDarkMode(!darkMode)}
+                        />
 
-                            <div className="lg:col-span-2 space-y-6">
-                                <WeekNavigator currentWeekStart={currentWeekStart} onWeekChange={setCurrentWeekStart} darkMode={darkMode} />
-                                <DietTable
-                                    meals={meals}
-                                    currentWeekStart={currentWeekStart}
-                                    onSelectMeal={(day, mealType) => {
-                                        setSelectedDay(day);
-                                        setSelectedMeal(mealType);
-                                        setShowFoodSearch(true);
-                                    }}
-                                    onRemoveFood={removeFoodFromMeal}
-                                    darkMode={darkMode}
-                                />
-                            </div>
-                        </div>
+                        {/* Content Area */}
+                        <main className="flex-1 p-4 md:p-6 space-y-6 overflow-y-auto">
+                            {currentTab === 'dashboard' && (
+                                <div className="space-y-6">
+                                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                        <div className="lg:col-span-1 space-y-6">
+                                            <GreetingCard user={user} darkMode={darkMode} />
+                                            <NutritionCard metrics={healthMetrics} darkMode={darkMode} />
+                                            <HealthMetricsCard
+                                                waterIntake={waterIntake}
+                                                weight={weight}
+                                                darkMode={darkMode}
+                                                onWaterChange={handleWaterChange}
+                                                onWeightChange={handleWeightChange}
+                                            />
+                                        </div>
+                                        <div className="lg:col-span-2">
+                                            <CalorieChart metrics={healthMetrics} darkMode={darkMode} />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
-                        <ChartsSection meals={meals} currentWeekStart={currentWeekStart} darkMode={darkMode} />
+                            {currentTab === 'planner' && (
+                                <div className="space-y-6">
+                                    <WeekNavigator currentWeekStart={currentWeekStart} onWeekChange={setCurrentWeekStart} darkMode={darkMode} />
+                                    <DietTable
+                                        meals={meals}
+                                        currentWeekStart={currentWeekStart}
+                                        onSelectMeal={(day, mealType) => {
+                                            setSelectedDay(day);
+                                            setSelectedMeal(mealType);
+                                            setShowFoodSearch(true);
+                                        }}
+                                        onRemoveFood={removeFoodFromMeal}
+                                        darkMode={darkMode}
+                                    />
+                                </div>
+                            )}
+
+                            {currentTab === 'insights' && (
+                                <ChartsSection meals={meals} currentWeekStart={currentWeekStart} darkMode={darkMode} />
+                            )}
+                        </main>
                     </div>
 
+                    {/* Food Search Modal */}
                     {showFoodSearch && (
                         <FoodSearchModal
                             foods={FOOD_DATABASE}
@@ -221,32 +259,102 @@
         }
 
         // ----------------------------------------------------------------------
-        // HEADER
+        // SIDEBAR
         // ----------------------------------------------------------------------
-        function Header({ user, darkMode, onToggleDarkMode }) {
+        function Sidebar({ user, darkMode, sidebarOpen, setSidebarOpen, currentTab, setCurrentTab, onToggleDarkMode }) {
+            const navItems = [
+                { id: 'dashboard', label: 'Dashboard', icon: Home },
+                { id: 'planner',  label: 'Meal Planner', icon: Calendar },
+                { id: 'insights', label: 'Insights', icon: BarChart3 },
+            ];
+
             return (
-                <header className={`backdrop-blur-md border-b ${darkMode ? 'border-slate-700/50 bg-slate-800/50' : 'border-slate-200/50 bg-white/50'}`}>
-                    <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xl font-bold">
+                <>
+                    {/* Mobile backdrop */}
+                    {sidebarOpen && (
+                        <div className="fixed inset-0 z-20 bg-black/50 lg:hidden" onClick={() => setSidebarOpen(false)}></div>
+                    )}
+
+                    <aside className={`
+                        fixed lg:static inset-y-0 left-0 z-30 w-64 transform transition-transform duration-300 ease-in-out
+                        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+                        ${darkMode ? 'bg-slate-800 border-r border-slate-700' : 'bg-white border-r border-slate-200'}
+                        flex flex-col
+                    `}>
+                        {/* Logo */}
+                        <div className="h-16 flex items-center px-6 border-b border-slate-200 dark:border-slate-700">
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xl font-bold mr-3">
                                 {user.avatar}
                             </div>
-                            <div>
-                                <h1 className="font-bold text-lg">NutriPlan</h1>
-                                <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>Meal Planning Made Smart</p>
+                            <h1 className="font-bold text-lg">NutriPlan</h1>
+                        </div>
+
+                        {/* Navigation */}
+                        <nav className="flex-1 px-4 py-6 space-y-2">
+                            {navItems.map(item => (
+                                <button
+                                    key={item.id}
+                                    onClick={() => {
+                                        setCurrentTab(item.id);
+                                        setSidebarOpen(false);
+                                    }}
+                                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                                        currentTab === item.id
+                                            ? darkMode ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-50 text-purple-700'
+                                            : darkMode ? 'text-slate-400 hover:bg-slate-700/50' : 'text-slate-600 hover:bg-slate-100'
+                                    }`}
+                                >
+                                    <item.icon size={20} />
+                                    {item.label}
+                                </button>
+                            ))}
+                        </nav>
+
+                        {/* User + theme toggle */}
+                        <div className={`p-4 border-t ${darkMode ? 'border-slate-700' : 'border-slate-200'}`}>
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-lg font-bold">
+                                    {user.avatar}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-semibold text-sm truncate">{user.name}</p>
+                                    <p className={`text-xs truncate ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{user.email}</p>
+                                </div>
                             </div>
-                        </div>
-                        <div className="flex items-center gap-4">
-                            <button className={`p-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'}`} aria-label="Notifications">
-                                <Bell size={20} />
-                            </button>
-                            <button onClick={onToggleDarkMode} className={`p-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'}`} aria-label="Toggle dark mode">
-                                {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-                            </button>
-                            <button className={`p-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'}`} aria-label="Settings">
-                                <Settings size={20} />
+                            <button
+                                onClick={onToggleDarkMode}
+                                className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${darkMode ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-100 hover:bg-slate-200'}`}
+                            >
+                                {darkMode ? <Sun size={16} /> : <Moon size={16} />}
+                                {darkMode ? 'Light Mode' : 'Dark Mode'}
                             </button>
                         </div>
+                    </aside>
+                </>
+            );
+        }
+
+        // ----------------------------------------------------------------------
+        // HEADER
+        // ----------------------------------------------------------------------
+        function Header({ user, darkMode, sidebarOpen, setSidebarOpen, onToggleDarkMode }) {
+            return (
+                <header className={`h-16 flex items-center px-4 md:px-6 border-b ${darkMode ? 'border-slate-700 bg-slate-800/50' : 'border-slate-200 bg-white/50'} backdrop-blur-md`}>
+                    <button
+                        onClick={() => setSidebarOpen(!sidebarOpen)}
+                        className="lg:hidden p-2 rounded-lg mr-3"
+                        aria-label="Toggle sidebar"
+                    >
+                        {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+                    </button>
+                    <div className="flex-1" />
+                    <div className="flex items-center gap-3">
+                        <button className={`p-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'}`} aria-label="Notifications">
+                            <Bell size={20} />
+                        </button>
+                        <button className={`p-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'}`} aria-label="Settings">
+                            <Settings size={20} />
+                        </button>
                     </div>
                 </header>
             );
@@ -259,12 +367,10 @@
             const hour = new Date().getHours();
             const greeting = hour < 12 ? '🌅 Good Morning' : hour < 18 ? '🌤️ Good Afternoon' : '🌙 Good Evening';
             return (
-                <div className={`rounded-3xl p-6 backdrop-blur-xl transition-all ${darkMode 
-                    ? 'bg-gradient-to-br from-slate-700/60 to-slate-800/60 border border-slate-600/50' 
-                    : 'bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200/50'}`}>
-                    <p className={`text-sm mb-2 ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>{greeting}</p>
-                    <h2 className="text-2xl font-bold mb-4">{user.name}</h2>
-                    <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                <div className={`rounded-2xl p-6 ${darkMode ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-slate-200 shadow-sm'}`}>
+                    <p className={`text-sm mb-1 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{greeting}</p>
+                    <h2 className="text-xl font-bold mb-1">{user.name}</h2>
+                    <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                         {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
                     </p>
                 </div>
@@ -279,34 +385,32 @@
             const percentage = Math.min((metrics.calories / target.calories) * 100, 100);
 
             return (
-                <div className={`rounded-3xl p-6 backdrop-blur-xl transition-all ${darkMode 
-                    ? 'bg-gradient-to-br from-emerald-500/20 to-teal-600/20 border border-emerald-500/30' 
-                    : 'bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200/50'}`}>
+                <div className={`rounded-2xl p-6 ${darkMode ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-slate-200 shadow-sm'}`}>
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="font-bold flex items-center gap-2">
                             <Zap size={20} className="text-yellow-400" />
                             Today's Nutrition
                         </h3>
                     </div>
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                         <div>
-                            <div className="flex justify-between mb-2">
+                            <div className="flex justify-between mb-1">
                                 <span className="text-sm font-medium">Calories</span>
                                 <span className="text-sm font-bold">{Math.round(metrics.calories)} / {target.calories}</span>
                             </div>
-                            <div className={`h-2 rounded-full overflow-hidden ${darkMode ? 'bg-slate-700' : 'bg-slate-200'}`}>
+                            <div className={`h-2 rounded-full overflow-hidden ${darkMode ? 'bg-slate-700' : 'bg-slate-100'}`}>
                                 <div className="h-full bg-gradient-to-r from-yellow-400 to-red-500 transition-all" style={{ width: `${percentage}%` }} />
                             </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div className="grid grid-cols-2 gap-3">
                             {[
                                 ['Protein', 'protein', 'g'],
                                 ['Carbs', 'carbs', 'g'],
                                 ['Fat', 'fat', 'g'],
                                 ['Fiber', 'fiber', 'g'],
                             ].map(([label, key, unit]) => (
-                                <div key={key} className={`p-2 rounded-lg ${darkMode ? 'bg-slate-700/50' : 'bg-white/50'}`}>
-                                    <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>{label}</p>
+                                <div key={key} className={`p-3 rounded-xl ${darkMode ? 'bg-slate-700/50' : 'bg-slate-50'}`}>
+                                    <p className={`text-xs mb-1 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{label}</p>
                                     <p className="font-bold">{Math.round(metrics[key])}{unit}</p>
                                 </div>
                             ))}
@@ -317,15 +421,13 @@
         }
 
         // ----------------------------------------------------------------------
-        // HEALTH METRICS CARD (NaN‑safe, BMI guarded)
+        // HEALTH METRICS CARD
         // ----------------------------------------------------------------------
         function HealthMetricsCard({ waterIntake, weight, darkMode, onWaterChange, onWeightChange }) {
             const bmi = weight > 0 ? (weight / 1.75 / 1.75).toFixed(1) : 'N/A';
 
             return (
-                <div className={`rounded-3xl p-6 backdrop-blur-xl space-y-4 transition-all ${darkMode 
-                    ? 'bg-gradient-to-br from-blue-500/20 to-cyan-600/20 border border-blue-500/30' 
-                    : 'bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-200/50'}`}>
+                <div className={`rounded-2xl p-6 ${darkMode ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-slate-200 shadow-sm'} space-y-6`}>
                     <div>
                         <h3 className="font-bold flex items-center gap-2 mb-3">
                             <Droplet size={20} className="text-blue-400" />
@@ -345,10 +447,10 @@
                                 />
                             ))}
                         </div>
-                        <p className="text-sm mt-2">{waterIntake} / 8 glasses</p>
+                        <p className="text-sm mt-2 opacity-60">{waterIntake} / 8 glasses</p>
                     </div>
 
-                    <div className={`border-t ${darkMode ? 'border-slate-700/50' : 'border-slate-200/50'} pt-4`}>
+                    <div>
                         <h3 className="font-bold flex items-center gap-2 mb-3">
                             <TrendingUp size={20} className="text-pink-400" />
                             Weight
@@ -371,7 +473,7 @@
         }
 
         // ----------------------------------------------------------------------
-        // CALORIE CHART (empty state, no fake data)
+        // CALORIE CHART (empty state)
         // ----------------------------------------------------------------------
         function CalorieChart({ metrics, darkMode }) {
             const total = metrics.protein + metrics.carbs + metrics.fat + metrics.fiber;
@@ -387,32 +489,36 @@
 
             if (data.length === 0) {
                 return (
-                    <div className={`rounded-3xl p-6 backdrop-blur-xl transition-all ${darkMode 
-                        ? 'bg-gradient-to-br from-purple-500/20 to-pink-600/20 border border-purple-500/30' 
-                        : 'bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200/50'}`}>
+                    <div className={`rounded-2xl p-6 h-full ${darkMode ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-slate-200 shadow-sm'}`}>
                         <h3 className="font-bold mb-4">Macro Distribution</h3>
-                        <p className={`text-center py-8 text-sm opacity-50 ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
-                            No macros logged today
-                        </p>
+                        <div className="flex items-center justify-center h-48">
+                            <p className={`text-sm opacity-50 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                                No macros logged today
+                            </p>
+                        </div>
                     </div>
                 );
             }
 
             return (
-                <div className={`rounded-3xl p-6 backdrop-blur-xl transition-all ${darkMode 
-                    ? 'bg-gradient-to-br from-purple-500/20 to-pink-600/20 border border-purple-500/30' 
-                    : 'bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200/50'}`}>
+                <div className={`rounded-2xl p-6 h-full ${darkMode ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-slate-200 shadow-sm'}`}>
                     <h3 className="font-bold mb-4">Macro Distribution</h3>
-                    <ResponsiveContainer width="100%" height={200}>
+                    <ResponsiveContainer width="100%" height={220}>
                         <PieChart>
-                            <Pie data={data} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={2} dataKey="value">
-                                {data.map((_, index) => (
-                                    <Cell key={`cell-${index}`} fill={colors[index]} />
-                                ))}
+                            <Pie data={data} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={3} dataKey="value">
+                                {data.map((_, idx) => <Cell key={`cell-${idx}`} fill={colors[idx]} />)}
                             </Pie>
-                            <Tooltip formatter={(value) => `${value.toFixed(0)}g`} />
+                            <Tooltip formatter={(value) => `${value}g`} />
                         </PieChart>
                     </ResponsiveContainer>
+                    <div className="flex justify-center gap-4 mt-4">
+                        {data.map((entry, idx) => (
+                            <div key={entry.name} className="flex items-center gap-2 text-sm">
+                                <span className="w-3 h-3 rounded-full" style={{ backgroundColor: colors[idx] }}></span>
+                                {entry.name}
+                            </div>
+                        ))}
+                    </div>
                 </div>
             );
         }
@@ -425,95 +531,80 @@
             weekEnd.setDate(weekEnd.getDate() + 6);
 
             return (
-                <div className={`rounded-3xl p-6 backdrop-blur-xl transition-all ${darkMode 
-                    ? 'bg-gradient-to-r from-slate-700/60 to-slate-800/60 border border-slate-600/50' 
-                    : 'bg-gradient-to-r from-slate-50 to-slate-100 border border-slate-200/50'}`}>
-                    <div className="flex items-center justify-between">
-                        <button
-                            onClick={() => {
-                                const newDate = new Date(currentWeekStart);
-                                newDate.setDate(newDate.getDate() - 7);
-                                onWeekChange(newDate);
-                            }}
-                            className={`p-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-slate-600' : 'hover:bg-slate-200'}`}
-                            aria-label="Previous week"
-                        >
-                            <ChevronLeft size={24} />
-                        </button>
-                        <div className="text-center">
-                            <p className="text-sm opacity-60">Week of</p>
-                            <p className="font-bold text-lg">
-                                {currentWeekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} –{' '}
-                                {weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                            </p>
-                        </div>
-                        <button
-                            onClick={() => {
-                                const newDate = new Date(currentWeekStart);
-                                newDate.setDate(newDate.getDate() + 7);
-                                onWeekChange(newDate);
-                            }}
-                            className={`p-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-slate-600' : 'hover:bg-slate-200'}`}
-                            aria-label="Next week"
-                        >
-                            <ChevronRight size={24} />
-                        </button>
+                <div className={`rounded-2xl p-4 flex items-center justify-between ${darkMode ? 'bg-slate-800 border border-slate-700' : 'bg-white border border-slate-200 shadow-sm'}`}>
+                    <button
+                        onClick={() => {
+                            const newDate = new Date(currentWeekStart);
+                            newDate.setDate(newDate.getDate() - 7);
+                            onWeekChange(newDate);
+                        }}
+                        className={`p-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'}`}
+                        aria-label="Previous week"
+                    >
+                        <ChevronLeft size={24} />
+                    </button>
+                    <div className="text-center">
+                        <p className="text-sm opacity-60">Week of</p>
+                        <p className="font-bold text-lg">
+                            {currentWeekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} –{' '}
+                            {weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        </p>
                     </div>
+                    <button
+                        onClick={() => {
+                            const newDate = new Date(currentWeekStart);
+                            newDate.setDate(newDate.getDate() + 7);
+                            onWeekChange(newDate);
+                        }}
+                        className={`p-2 rounded-lg transition-colors ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'}`}
+                        aria-label="Next week"
+                    >
+                        <ChevronRight size={24} />
+                    </button>
                 </div>
             );
         }
 
         // ----------------------------------------------------------------------
-        // DIET TABLE (fully stable callbacks, memoized rows & cells)
+        // DIET TABLE (fully optimised)
         // ----------------------------------------------------------------------
-        const MealCell = React.memo(({ foods, onAdd, onRemove, darkMode }) => {
-            return (
-                <div className={`min-h-[110px] rounded-xl p-2 ${darkMode ? 'bg-slate-700/30' : 'bg-slate-50'} flex flex-col justify-between`}>
-                    <div className="space-y-1 mb-2 overflow-y-auto max-h-20">
-                        {foods.map(food => (
-                            <div key={food.id} className={`text-xs p-1.5 rounded flex justify-between items-center gap-1 ${darkMode ? 'bg-slate-700/70' : 'bg-white border shadow-sm'}`}>
-                                <span className="truncate block max-w-[100px]" title={`${food.emoji} ${food.name}`}>
-                                    {food.emoji} {food.name}
-                                </span>
-                                <div className="flex items-center gap-1 shrink-0">
-                                    <span className="opacity-60">{food.calories}k</span>
-                                    <button onClick={() => onRemove(food.id)} className="text-red-400 hover:text-red-500 font-bold px-0.5" aria-label="Remove food">✕</button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                    <button
-                        onClick={onAdd}
-                        className={`w-full py-1 rounded-lg flex items-center justify-center gap-1 text-xs font-medium transition-colors ${
-                            darkMode ? 'bg-slate-700 hover:bg-slate-600 text-purple-400' : 'bg-white border hover:bg-slate-50 text-purple-600'
-                        }`}
-                    >
-                        <Plus size={12} /> Add
-                    </button>
+        const MealCell = React.memo(({ foods, onAdd, onRemove, darkMode }) => (
+            <div className={`rounded-xl p-2 h-full flex flex-col justify-between ${darkMode ? 'bg-slate-700/30' : 'bg-slate-50'}`}>
+                <div className="space-y-1 mb-2 max-h-28 overflow-y-auto custom-scroll">
+                    {foods.map(food => (
+                        <div key={food.id} className={`text-xs p-2 rounded-lg flex items-center gap-2 ${darkMode ? 'bg-slate-700/60' : 'bg-white border shadow-sm'}`}>
+                            <span className="truncate flex-1 min-w-0" title={`${food.emoji} ${food.name}`}>
+                                {food.emoji} {food.name}
+                            </span>
+                            <span className="shrink-0 opacity-60">{food.calories}k</span>
+                            <button onClick={() => onRemove(food.id)} className="shrink-0 text-red-400 hover:text-red-500 px-0.5" aria-label="Remove food">✕</button>
+                        </div>
+                    ))}
                 </div>
-            );
-        });
+                <button
+                    onClick={onAdd}
+                    className={`w-full py-1.5 rounded-lg text-xs font-medium flex items-center justify-center gap-1 transition-colors ${
+                        darkMode ? 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-400' : 'bg-purple-50 hover:bg-purple-100 text-purple-600'
+                    }`}
+                >
+                    <Plus size={12} /> Add
+                </button>
+            </div>
+        ));
 
         function DietTable({ meals, currentWeekStart, onSelectMeal, onRemoveFood, darkMode }) {
-            const stableOnSelect = useCallback((date, mealType) => {
-                onSelectMeal(date, mealType);
-            }, [onSelectMeal]);
-
-            const stableOnRemove = useCallback((dateKey, mealType, foodId) => {
-                onRemoveFood(dateKey, mealType, foodId);
-            }, [onRemoveFood]);
+            const stableOnSelect = useCallback((date, mealType) => onSelectMeal(date, mealType), [onSelectMeal]);
+            const stableOnRemove = useCallback((dateKey, mealType, foodId) => onRemoveFood(dateKey, mealType, foodId), [onRemoveFood]);
 
             return (
-                <div className={`rounded-3xl backdrop-blur-xl overflow-hidden border transition-all ${darkMode 
-                    ? 'border-slate-600/50 bg-slate-800/30' 
-                    : 'border-slate-200/50 bg-white/30'}`}>
+                <div className={`rounded-2xl overflow-hidden border ${darkMode ? 'border-slate-700 bg-slate-800' : 'border-slate-200 bg-white shadow-sm'}`}>
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead>
-                                <tr className={`border-b ${darkMode ? 'border-slate-600/50 bg-slate-700/50' : 'border-slate-200/50 bg-slate-100/50'}`}>
-                                    <th className="px-6 py-4 text-left font-bold">Day</th>
+                                <tr className={`border-b ${darkMode ? 'border-slate-700 bg-slate-800' : 'border-slate-200 bg-slate-50'}`}>
+                                    <th className="px-4 py-3 text-left font-semibold text-sm">Day</th>
                                     {MEAL_TYPES.map(meal => (
-                                        <th key={meal} className="px-6 py-4 text-left font-bold">{meal}</th>
+                                        <th key={meal} className="px-4 py-3 text-left font-semibold text-sm">{meal}</th>
                                     ))}
                                 </tr>
                             </thead>
@@ -546,31 +637,26 @@
         }
 
         const DietTableRow = React.memo(({ day, date, dateKey, isToday, meals, darkMode, onSelectMeal, onRemoveFood }) => {
-            // Pre‑compute stable add/remove handlers for each meal type
-            const addHandlers = useMemo(() => 
+            const addHandlers = useMemo(() =>
                 Object.fromEntries(MEAL_TYPES.map(mt => [mt, () => onSelectMeal(date, mt)]))
             , [onSelectMeal, date]);
 
-            const removeHandlers = useMemo(() => 
+            const removeHandlers = useMemo(() =>
                 Object.fromEntries(MEAL_TYPES.map(mt => [mt, (foodId) => onRemoveFood(dateKey, mt, foodId)]))
             , [onRemoveFood, dateKey]);
 
             return (
-                <tr
-                    className={`border-b transition-colors ${
-                        isToday
-                            ? darkMode ? 'bg-purple-500/20' : 'bg-purple-50'
-                            : darkMode ? 'hover:bg-slate-700/30' : 'hover:bg-slate-50'
-                    } ${darkMode ? 'border-slate-600/50' : 'border-slate-200/50'}`}
-                >
-                    <td className={`px-6 py-4 font-bold ${isToday ? 'text-purple-400' : ''}`}>
+                <tr className={`border-b transition-colors ${
+                    isToday ? (darkMode ? 'bg-purple-500/10' : 'bg-purple-50') : ''
+                } ${darkMode ? 'border-slate-700 hover:bg-slate-700/30' : 'border-slate-200 hover:bg-slate-50'}`}>
+                    <td className={`px-4 py-3 font-semibold ${isToday ? 'text-purple-400' : ''}`}>
                         <div>
-                            <p>{day}</p>
+                            <p className="text-sm">{day}</p>
                             <p className="text-xs opacity-60">{date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
                         </div>
                     </td>
                     {MEAL_TYPES.map(mealType => (
-                        <td key={mealType} className="px-6 py-4 min-w-[160px]">
+                        <td key={mealType} className="px-2 py-2 min-w-[140px]">
                             <MealCell
                                 foods={meals[dateKey]?.[mealType] || []}
                                 onAdd={addHandlers[mealType]}
@@ -584,7 +670,7 @@
         });
 
         // ----------------------------------------------------------------------
-        // FOOD SEARCH MODAL (full accessibility)
+        // FOOD SEARCH MODAL (full a11y)
         // ----------------------------------------------------------------------
         function FoodSearchModal({ foods, onSelectFood, onClose, darkMode, selectedDay, selectedMeal }) {
             const [search, setSearch] = useState('');
@@ -592,37 +678,27 @@
             const modalRef = useRef(null);
             const closeButtonRef = useRef(null);
 
-            // Escape key
             useEffect(() => {
-                const handleKeyDown = (e) => e.key === 'Escape' && onClose();
-                document.addEventListener('keydown', handleKeyDown);
-                return () => document.removeEventListener('keydown', handleKeyDown);
+                const handleKey = (e) => e.key === 'Escape' && onClose();
+                document.addEventListener('keydown', handleKey);
+                return () => document.removeEventListener('keydown', handleKey);
             }, [onClose]);
 
-            // Focus trap
             useEffect(() => {
-                const handleTab = (e) => {
+                const trapFocus = (e) => {
                     if (!modalRef.current?.contains(e.target)) return;
-                    const focusable = modalRef.current.querySelectorAll(
-                        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-                    );
+                    const focusable = modalRef.current.querySelectorAll('button, input, [tabindex]:not([tabindex="-1"])');
                     if (focusable.length === 0) return;
                     const first = focusable[0];
                     const last = focusable[focusable.length - 1];
-                    if (e.shiftKey && document.activeElement === first) {
-                        last.focus(); e.preventDefault();
-                    } else if (!e.shiftKey && document.activeElement === last) {
-                        first.focus(); e.preventDefault();
-                    }
+                    if (e.shiftKey && document.activeElement === first) { last.focus(); e.preventDefault(); }
+                    else if (!e.shiftKey && document.activeElement === last) { first.focus(); e.preventDefault(); }
                 };
-                document.addEventListener('keydown', handleTab);
-                return () => document.removeEventListener('keydown', handleTab);
+                document.addEventListener('keydown', trapFocus);
+                return () => document.removeEventListener('keydown', trapFocus);
             }, []);
 
-            // Focus close button on mount
-            useEffect(() => {
-                closeButtonRef.current?.focus();
-            }, []);
+            useEffect(() => { closeButtonRef.current?.focus(); }, []);
 
             useEffect(() => {
                 const q = search.toLowerCase();
@@ -634,30 +710,28 @@
                 : '';
 
             return (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
+                <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
                     <div
                         ref={modalRef}
-                        className={`rounded-3xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col ${darkMode ? 'bg-slate-800 text-white' : 'bg-white text-slate-900'}`}
-                        onClick={(e) => e.stopPropagation()}
+                        className={`w-full max-w-2xl max-h-[80vh] rounded-2xl overflow-hidden flex flex-col ${darkMode ? 'bg-slate-800 text-white' : 'bg-white text-slate-900'}`}
+                        onClick={e => e.stopPropagation()}
                         role="dialog"
                         aria-modal="true"
                         aria-labelledby="modal-title"
                     >
                         <div className={`p-6 border-b ${darkMode ? 'border-slate-700' : 'border-slate-200'}`}>
-                            <div className="flex items-center justify-between mb-2">
-                                <h2 id="modal-title" className="text-2xl font-bold">Add Food</h2>
-                                <button ref={closeButtonRef} onClick={onClose} className="text-xl opacity-60 hover:opacity-100" aria-label="Close modal">✕</button>
+                            <div className="flex justify-between items-center mb-2">
+                                <h2 id="modal-title" className="text-xl font-bold">Add Food</h2>
+                                <button ref={closeButtonRef} onClick={onClose} className="p-1 opacity-60 hover:opacity-100" aria-label="Close modal">✕</button>
                             </div>
-                            <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
-                                {formattedDate} — {selectedMeal}
-                            </p>
-                            <div className={`mt-4 flex items-center gap-2 px-3 py-2 rounded-xl border ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-slate-50 border-slate-200'}`}>
+                            <p className="text-sm opacity-60">{formattedDate} — {selectedMeal}</p>
+                            <div className={`mt-4 flex items-center gap-2 px-4 py-2 rounded-xl border ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-slate-50 border-slate-200'}`}>
                                 <Search size={18} className="opacity-60" />
                                 <input
                                     type="text"
                                     placeholder="Search foods…"
                                     value={search}
-                                    onChange={(e) => setSearch(e.target.value)}
+                                    onChange={e => setSearch(e.target.value)}
                                     className="flex-1 bg-transparent outline-none text-sm"
                                 />
                             </div>
@@ -668,15 +742,13 @@
                                     <button
                                         key={food.id}
                                         onClick={() => { onSelectFood(food); onClose(); }}
-                                        className={`text-left p-3 rounded-xl transition-all border ${darkMode ? 'bg-slate-700/40 border-slate-700 hover:bg-slate-700' : 'bg-slate-50 border-slate-100 hover:bg-slate-100'}`}
+                                        className={`text-left p-3 rounded-xl border transition-colors ${darkMode ? 'bg-slate-700/40 border-slate-600 hover:bg-slate-700' : 'bg-slate-50 border-slate-100 hover:bg-slate-100'}`}
                                     >
                                         <div className="flex justify-between items-center">
                                             <div>
                                                 <p className="font-semibold text-sm">{food.emoji} {food.name}</p>
                                                 <p className="text-xs opacity-60">{food.calories} kcal</p>
-                                                <p className="text-[10px] opacity-40 mt-0.5">
-                                                    P: {food.protein}g | C: {food.carbs}g | F: {food.fat}g
-                                                </p>
+                                                <p className="text-[10px] opacity-40 mt-0.5">P: {food.protein}g | C: {food.carbs}g | F: {food.fat}g</p>
                                             </div>
                                             <Plus size={16} className="text-purple-500" />
                                         </div>
@@ -690,12 +762,11 @@
         }
 
         // ----------------------------------------------------------------------
-        // CHARTS SECTION (memoized computation)
+        // CHARTS SECTION (memoized)
         // ----------------------------------------------------------------------
         function ChartsSection({ meals, currentWeekStart, darkMode }) {
             const { weekData, nutritionData } = useMemo(() => {
-                const weekData = [];
-                const nutritionData = [];
+                const weekData = [], nutritionData = [];
                 for (let i = 0; i < 7; i++) {
                     const date = new Date(currentWeekStart);
                     date.setDate(date.getDate() + i);
@@ -712,16 +783,15 @@
                             });
                         }
                     });
-                    const dayName = WEEK_DAYS[i].substring(0, 3);
-                    weekData.push({ day: dayName, calories: Math.round(cals) });
-                    nutritionData.push({ day: dayName, protein: Math.round(protein), carbs: Math.round(carbs), fat: Math.round(fat) });
+                    weekData.push({ day: WEEK_DAYS[i].substring(0, 3), calories: Math.round(cals) });
+                    nutritionData.push({ day: WEEK_DAYS[i].substring(0, 3), protein: Math.round(protein), carbs: Math.round(carbs), fat: Math.round(fat) });
                 }
                 return { weekData, nutritionData };
             }, [meals, currentWeekStart]);
 
             return (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div className={`rounded-3xl p-6 border ${darkMode ? 'bg-slate-800/60 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+                    <div className={`rounded-2xl p-6 border ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200 shadow-sm'}`}>
                         <h3 className="font-bold mb-4">Weekly Calories</h3>
                         <ResponsiveContainer width="100%" height={260}>
                             <LineChart data={weekData}>
@@ -734,7 +804,7 @@
                             </LineChart>
                         </ResponsiveContainer>
                     </div>
-                    <div className={`rounded-3xl p-6 border ${darkMode ? 'bg-slate-800/60 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+                    <div className={`rounded-2xl p-6 border ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200 shadow-sm'}`}>
                         <h3 className="font-bold mb-4">Weekly Macros</h3>
                         <ResponsiveContainer width="100%" height={260}>
                             <BarChart data={nutritionData}>
@@ -743,9 +813,9 @@
                                 <YAxis stroke={darkMode ? '#94a3b8' : '#64748b'} />
                                 <Tooltip contentStyle={{ backgroundColor: darkMode ? '#1e293b' : '#fff', border: 'none', borderRadius: '8px' }} />
                                 <Legend />
-                                <Bar dataKey="protein" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
-                                <Bar dataKey="carbs"   fill="#ec4899" radius={[4, 4, 0, 0]} />
-                                <Bar dataKey="fat"     fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                                <Bar dataKey="protein" fill="#8b5cf6" radius={[4,4,0,0]} />
+                                <Bar dataKey="carbs"   fill="#ec4899" radius={[4,4,0,0]} />
+                                <Bar dataKey="fat"     fill="#f59e0b" radius={[4,4,0,0]} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
