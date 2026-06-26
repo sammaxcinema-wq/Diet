@@ -360,17 +360,6 @@
             color: var(--text-muted);
         }
 
-        .day-card .meal-section .meal-label .badge-cal {
-            margin-left: auto;
-            font-weight: 500;
-            color: var(--text-muted);
-            font-size: 11px;
-            background: var(--badge-bg);
-            padding: 2px 10px;
-            border-radius: 100px;
-            transition: background 0.3s, color 0.3s;
-        }
-
         .meal-item {
             display: flex;
             align-items: center;
@@ -403,19 +392,6 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-        }
-
-        .meal-item .meal-info .meal-desc {
-            font-size: 12px;
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            margin-top: 1px;
-        }
-
-        .meal-item .meal-info .meal-desc i {
-            font-size: 10px;
         }
 
         .meal-item .meal-actions {
@@ -566,12 +542,6 @@
             background: var(--bg-card);
         }
 
-        .modal .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px;
-        }
-
         .modal .modal-actions {
             display: flex;
             gap: 12px;
@@ -605,10 +575,6 @@
 
             .modal {
                 padding: 24px 20px;
-            }
-
-            .modal .form-row {
-                grid-template-columns: 1fr;
             }
 
             .header-actions .date-badge {
@@ -718,13 +684,6 @@
                 </div>
             </div>
             <div class="stat-item">
-                <div class="icon orange"><i class="fas fa-fire"></i></div>
-                <div class="info">
-                    <div class="label">Avg Calories / Day</div>
-                    <div class="value" id="avgCalories">0</div>
-                </div>
-            </div>
-            <div class="stat-item">
                 <div class="icon purple"><i class="fas fa-list-check"></i></div>
                 <div class="info">
                     <div class="label">Completion</div>
@@ -771,17 +730,6 @@
                     <input type="text" id="mealName" placeholder="e.g. Avocado Toast" required />
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="mealCal">Calories</label>
-                        <input type="number" id="mealCal" placeholder="420" min="0" required />
-                    </div>
-                    <div class="form-group">
-                        <label for="mealProtein">Protein (g)</label>
-                        <input type="number" id="mealProtein" placeholder="12" min="0" />
-                    </div>
-                </div>
-
                 <input type="hidden" id="editIndex" value="-1" />
 
                 <div class="modal-actions">
@@ -805,42 +753,42 @@
         const MEAL_ICONS = { breakfast: 'fa-sun', lunch: 'fa-cloud-sun', dinner: 'fa-moon' };
         const MEAL_EMOJIS = { breakfast: '🍳', lunch: '🥗', dinner: '🍝' };
 
-        // Default data (populated with some example meals)
+        // Default data (only meal names)
         const DEFAULT_DATA = {
             sunday: {
-                breakfast: [{ name: 'Avocado Toast', calories: 320, protein: 10 }],
-                lunch: [{ name: 'Quinoa Salad', calories: 420, protein: 14 }],
-                dinner: [{ name: 'Grilled Chicken', calories: 480, protein: 38 }]
+                breakfast: [{ name: 'Avocado Toast' }],
+                lunch: [{ name: 'Quinoa Salad' }],
+                dinner: [{ name: 'Grilled Chicken' }]
             },
             monday: {
-                breakfast: [{ name: 'Oatmeal with Berries', calories: 280, protein: 8 }],
-                lunch: [{ name: 'Turkey Sandwich', calories: 390, protein: 22 }],
-                dinner: [{ name: 'Salmon with Veggies', calories: 520, protein: 34 }]
+                breakfast: [{ name: 'Oatmeal with Berries' }],
+                lunch: [{ name: 'Turkey Sandwich' }],
+                dinner: [{ name: 'Salmon with Veggies' }]
             },
             tuesday: {
-                breakfast: [{ name: 'Greek Yogurt Parfait', calories: 260, protein: 18 }],
-                lunch: [{ name: 'Chicken Caesar Wrap', calories: 410, protein: 26 }],
-                dinner: [{ name: 'Pasta Primavera', calories: 460, protein: 16 }]
+                breakfast: [{ name: 'Greek Yogurt Parfait' }],
+                lunch: [{ name: 'Chicken Caesar Wrap' }],
+                dinner: [{ name: 'Pasta Primavera' }]
             },
             wednesday: {
-                breakfast: [{ name: 'Smoothie Bowl', calories: 300, protein: 12 }],
-                lunch: [{ name: 'Mediterranean Plate', calories: 370, protein: 15 }],
-                dinner: [{ name: 'Beef Stir-fry', calories: 500, protein: 32 }]
+                breakfast: [{ name: 'Smoothie Bowl' }],
+                lunch: [{ name: 'Mediterranean Plate' }],
+                dinner: [{ name: 'Beef Stir-fry' }]
             },
             thursday: {
-                breakfast: [{ name: 'Eggs & Toast', calories: 340, protein: 20 }],
-                lunch: [{ name: 'Tuna Salad', calories: 350, protein: 24 }],
-                dinner: [{ name: 'Vegetable Curry', calories: 430, protein: 12 }]
+                breakfast: [{ name: 'Eggs & Toast' }],
+                lunch: [{ name: 'Tuna Salad' }],
+                dinner: [{ name: 'Vegetable Curry' }]
             },
             friday: {
-                breakfast: [{ name: 'Pancakes with Syrup', calories: 380, protein: 9 }],
-                lunch: [{ name: 'Caprese Sandwich', calories: 400, protein: 18 }],
-                dinner: [{ name: 'Fish Tacos', calories: 470, protein: 28 }]
+                breakfast: [{ name: 'Pancakes with Syrup' }],
+                lunch: [{ name: 'Caprese Sandwich' }],
+                dinner: [{ name: 'Fish Tacos' }]
             },
             saturday: {
-                breakfast: [{ name: 'Fruit & Granola', calories: 290, protein: 7 }],
-                lunch: [{ name: 'Hummus Wrap', calories: 360, protein: 14 }],
-                dinner: [{ name: 'Pizza Margherita', calories: 550, protein: 22 }]
+                breakfast: [{ name: 'Fruit & Granola' }],
+                lunch: [{ name: 'Hummus Wrap' }],
+                dinner: [{ name: 'Pizza Margherita' }]
             }
         };
 
@@ -853,6 +801,17 @@
         if (!mealData) {
             mealData = JSON.parse(JSON.stringify(DEFAULT_DATA));
             localStorage.setItem('mealPlannerData', JSON.stringify(mealData));
+        } else {
+            // Ensure any old data with calories/protein is cleaned (just keep name)
+            DAYS.forEach(day => {
+                MEAL_TYPES.forEach(type => {
+                    if (mealData[day] && mealData[day][type]) {
+                        mealData[day][type] = mealData[day][type].map(m => {
+                            return { name: m.name || 'Untitled' };
+                        });
+                    }
+                });
+            });
         }
 
         let editingIndex = -1;
@@ -865,7 +824,6 @@
         const themeToggle = document.getElementById('themeToggle');
         const themeIcon = document.getElementById('themeIcon');
 
-        // Load saved theme preference
         const savedTheme = localStorage.getItem('mealPlannerTheme') || 'light';
         if (savedTheme === 'dark') {
             document.body.classList.add('dark-theme');
@@ -888,7 +846,6 @@
 
             let totalMeals = 0;
             let daysWithMeals = 0;
-            let totalCalories = 0;
 
             DAYS.forEach((day, idx) => {
                 const dayData = mealData[day];
@@ -904,7 +861,7 @@
                 header.className = 'day-header';
                 header.innerHTML = `
               <div class="day-name">${DAY_LABELS[idx]} <span>${dayTotal} meals</span></div>
-              <div class="day-total">${calcDayCalories(dayData)} kcal</div>
+              <div class="day-total">${dayTotal} items</div>
             `;
                 card.appendChild(header);
 
@@ -917,13 +874,11 @@
                     const label = MEAL_LABELS[type];
                     const icon = MEAL_ICONS[type];
                     const emoji = MEAL_EMOJIS[type];
-                    const calSum = meals.reduce((s, m) => s + (m.calories || 0), 0);
 
                     const labelDiv = document.createElement('div');
                     labelDiv.className = 'meal-label';
                     labelDiv.innerHTML = `
                 <i class="fas ${icon}"></i> ${label}
-                <span class="badge-cal">${calSum} kcal</span>
               `;
                     section.appendChild(labelDiv);
 
@@ -940,10 +895,6 @@
                             item.innerHTML = `
                     <div class="meal-info">
                       <div class="meal-name">${escapeHtml(meal.name)}</div>
-                      <div class="meal-desc">
-                        <i class="fas fa-fire" style="color:#f59e0b;"></i> ${meal.calories || 0} kcal
-                        ${meal.protein ? ` · <i class="fas fa-dumbbell" style="color:#8b5cf6;"></i> ${meal.protein}g protein` : ''}
-                      </div>
                     </div>
                     <div class="meal-actions">
                       <button class="edit-btn" onclick="editMeal('${day}','${type}',${mi})" title="Edit">
@@ -974,15 +925,6 @@
             // Update stats
             document.getElementById('totalMeals').textContent = totalMeals;
             document.getElementById('daysPlanned').textContent = daysWithMeals;
-
-            // Avg calories
-            let avg = 0;
-            if (daysWithMeals > 0) {
-                let totalCal = 0;
-                DAYS.forEach(d => { totalCal += calcDayCalories(mealData[d]); });
-                avg = Math.round(totalCal / daysWithMeals);
-            }
-            document.getElementById('avgCalories').textContent = avg;
 
             // Completion: % of meal slots filled (7 days * 3 meals = 21)
             const totalSlots = 21;
@@ -1015,14 +957,6 @@
             let n = 0;
             MEAL_TYPES.forEach(t => { n += (day[t] || []).length; });
             return n;
-        }
-
-        function calcDayCalories(day) {
-            let sum = 0;
-            MEAL_TYPES.forEach(t => {
-                (day[t] || []).forEach(m => { sum += (m.calories || 0); });
-            });
-            return sum;
         }
 
         function escapeHtml(text) {
@@ -1068,8 +1002,6 @@
             document.getElementById('mealDay').value = day;
             document.getElementById('mealType').value = type;
             document.getElementById('mealName').value = meal.name || '';
-            document.getElementById('mealCal').value = meal.calories || '';
-            document.getElementById('mealProtein').value = meal.protein || '';
             document.getElementById('editIndex').value = index;
 
             document.getElementById('modalTitle').textContent = 'Edit Meal';
@@ -1086,8 +1018,6 @@
             const day = document.getElementById('mealDay').value;
             const type = document.getElementById('mealType').value;
             const name = document.getElementById('mealName').value.trim();
-            const calories = parseInt(document.getElementById('mealCal').value) || 0;
-            const protein = parseInt(document.getElementById('mealProtein').value) || 0;
             const editIdx = parseInt(document.getElementById('editIndex').value);
 
             if (!name) {
@@ -1098,7 +1028,7 @@
             if (!mealData[day]) mealData[day] = { breakfast: [], lunch: [], dinner: [] };
             if (!mealData[day][type]) mealData[day][type] = [];
 
-            const newMeal = { name, calories, protein };
+            const newMeal = { name };
 
             if (editIdx >= 0 && editIdx < mealData[day][type].length) {
                 // Edit existing
