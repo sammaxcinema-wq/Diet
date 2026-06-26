@@ -2,10 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Weekly Meal Planner</title>
-    <!-- Font Awesome for icons -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <title>Meal Planner Pro</title>
+
+    <!-- PWA meta tags -->
+    <meta name="theme-color" content="#3b82f6" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" id="manifestLink" />
+
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
     <style>
         /* ───────────── CSS VARIABLES (LIGHT default) ───────────── */
         :root {
@@ -37,6 +45,8 @@
             --add-btn-hover: #2563eb;
             --delete-btn-hover-bg: #fee2e2;
             --delete-btn-hover-color: #ef4444;
+            --auth-bg: #ffffff;
+            --auth-shadow: 0 20px 60px rgba(0,0,0,0.15);
         }
 
         /* ───────────── DARK THEME ───────────── */
@@ -65,6 +75,8 @@
             --add-btn-hover: #93bbfc;
             --delete-btn-hover-bg: #3b1e1e;
             --delete-btn-hover-color: #f87171;
+            --auth-bg: #1a1f2b;
+            --auth-shadow: 0 20px 60px rgba(0,0,0,0.5);
         }
 
         /* ───────────── RESET & BASE ───────────── */
@@ -80,7 +92,7 @@
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             background: var(--bg-body);
             color: var(--text-primary);
-            padding: 24px 16px 40px;
+            padding: 0;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -91,9 +103,112 @@
         .app-wrapper {
             max-width: 1280px;
             width: 100%;
+            padding: 24px 16px 40px;
         }
 
-        /* ───────────── HEADER ───────────── */
+        /* ───────────── AUTH OVERLAY ───────────── */
+        #authContainer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-body);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+            transition: background 0.3s;
+        }
+        #authContainer.hidden {
+            display: none;
+        }
+
+        .auth-box {
+            background: var(--auth-bg);
+            border-radius: 32px;
+            padding: 40px 36px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: var(--auth-shadow);
+            transition: background 0.3s, box-shadow 0.3s;
+        }
+
+        .auth-box h2 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--text-primary);
+        }
+
+        .auth-box .sub {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
+        .auth-box .form-group {
+            margin-bottom: 16px;
+        }
+
+        .auth-box .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .auth-box .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--input-border);
+            border-radius: 14px;
+            font-size: 14px;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            transition: border-color 0.2s, background 0.3s, color 0.3s;
+        }
+
+        .auth-box .form-group input:focus {
+            outline: none;
+            border-color: var(--stat-icon-blue);
+        }
+
+        .auth-box .btn {
+            width: 100%;
+            justify-content: center;
+            padding: 12px;
+            font-size: 16px;
+        }
+
+        .auth-box .auth-switch {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .auth-box .auth-switch a {
+            color: var(--stat-icon-blue);
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .auth-box .auth-switch a:hover {
+            text-decoration: underline;
+        }
+
+        .auth-error {
+            color: #ef4444;
+            font-size: 13px;
+            margin-top: 8px;
+            display: none;
+        }
+
+        /* ───────────── HEADER (with auth) ───────────── */
         .app-header {
             display: flex;
             flex-wrap: wrap;
@@ -166,26 +281,6 @@
             box-shadow: 0 8px 20px rgba(59, 130, 246, 0.40);
         }
 
-        .btn-success {
-            background: #22c55e;
-            color: white;
-            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.30);
-        }
-        .btn-success:hover {
-            background: #16a34a;
-            transform: translateY(-2px);
-        }
-
-        .btn-danger {
-            background: #ef4444;
-            color: white;
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.30);
-        }
-        .btn-danger:hover {
-            background: #dc2626;
-            transform: translateY(-2px);
-        }
-
         .btn-outline {
             background: transparent;
             border: 2px solid var(--border-medium);
@@ -196,12 +291,6 @@
             background: var(--meal-item-hover);
         }
 
-        .btn-sm {
-            padding: 6px 14px;
-            font-size: 12px;
-        }
-
-        /* theme toggle */
         .btn-theme {
             background: var(--bg-card);
             color: var(--text-secondary);
@@ -220,6 +309,17 @@
         .btn-theme:hover {
             border-color: var(--text-muted);
             background: var(--meal-item-hover);
+        }
+
+        .pro-badge {
+            background: #f59e0b;
+            color: #1e293b;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 100px;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
         }
 
         /* ───────────── STATS BAR ───────────── */
@@ -253,18 +353,9 @@
             flex-shrink: 0;
         }
 
-        .stat-item .icon.blue {
-            background: var(--stat-icon-blue);
-        }
-        .stat-item .icon.green {
-            background: var(--stat-icon-green);
-        }
-        .stat-item .icon.orange {
-            background: var(--stat-icon-orange);
-        }
-        .stat-item .icon.purple {
-            background: var(--stat-icon-purple);
-        }
+        .stat-item .icon.blue { background: var(--stat-icon-blue); }
+        .stat-item .icon.green { background: var(--stat-icon-green); }
+        .stat-item .icon.purple { background: var(--stat-icon-purple); }
 
         .stat-item .info .label {
             font-size: 12px;
@@ -372,13 +463,8 @@
             gap: 10px;
         }
 
-        .meal-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .meal-item:hover {
-            background: var(--meal-item-hover);
-        }
+        .meal-item:last-child { margin-bottom: 0; }
+        .meal-item:hover { background: var(--meal-item-hover); }
 
         .meal-item .meal-info {
             flex: 1;
@@ -450,10 +536,7 @@
             margin-top: 4px;
             transition: color 0.15s;
         }
-
-        .add-meal-btn:hover {
-            color: var(--add-btn-hover);
-        }
+        .add-meal-btn:hover { color: var(--add-btn-hover); }
 
         /* ───────────── MODAL ───────────── */
         .modal-overlay {
@@ -471,20 +554,10 @@
             padding: 20px;
             animation: fadeIn 0.25s ease;
         }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
+        .modal-overlay.active { display: flex; }
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.96);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
         }
 
         .modal {
@@ -493,7 +566,7 @@
             padding: 32px 36px;
             max-width: 480px;
             width: 100%;
-            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.20);
+            box-shadow: 0 32px 64px rgba(0,0,0,0.20);
             transition: background 0.3s;
         }
 
@@ -547,109 +620,78 @@
             gap: 12px;
             margin-top: 24px;
         }
-
-        .modal .modal-actions .btn {
-            flex: 1;
-            justify-content: center;
-        }
+        .modal .modal-actions .btn { flex: 1; justify-content: center; }
 
         /* ───────────── RESPONSIVE ───────────── */
         @media (max-width: 768px) {
-            .app-header h1 {
-                font-size: 22px;
-            }
-
-            .stats-bar {
-                grid-template-columns: 1fr 1fr;
-                padding: 14px 18px;
-                gap: 10px;
-            }
-
-            .stat-item .info .value {
-                font-size: 17px;
-            }
-
-            .week-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .modal {
-                padding: 24px 20px;
-            }
-
-            .header-actions .date-badge {
-                font-size: 12px;
-                padding: 6px 14px;
-            }
-
-            .btn {
-                font-size: 13px;
-                padding: 8px 16px;
-            }
+            .app-header h1 { font-size: 22px; }
+            .stats-bar { grid-template-columns: 1fr 1fr; padding: 14px 18px; gap: 10px; }
+            .stat-item .info .value { font-size: 17px; }
+            .week-grid { grid-template-columns: 1fr; }
+            .modal { padding: 24px 20px; }
+            .header-actions .date-badge { font-size: 12px; padding: 6px 14px; }
+            .btn { font-size: 13px; padding: 8px 16px; }
+            .auth-box { padding: 32px 20px; }
         }
 
         @media (max-width: 480px) {
-            body {
-                padding: 12px 8px 30px;
-            }
-
-            .app-header {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 12px;
-            }
-
-            .header-actions {
-                justify-content: space-between;
-            }
-
-            .stats-bar {
-                grid-template-columns: 1fr 1fr;
-                gap: 8px;
-                padding: 12px 14px;
-            }
-
-            .day-card .day-header {
-                padding: 14px 16px 10px;
-            }
-
-            .day-card .meal-section {
-                padding: 10px 16px 14px;
-            }
-
-            .meal-item {
-                padding: 8px 12px;
-            }
-
-            .modal .modal-actions {
-                flex-direction: column;
-            }
+            body { padding: 0; }
+            .app-wrapper { padding: 12px 8px 30px; }
+            .app-header { flex-direction: column; align-items: stretch; gap: 12px; }
+            .header-actions { justify-content: space-between; flex-wrap: wrap; }
+            .stats-bar { grid-template-columns: 1fr 1fr; gap: 8px; padding: 12px 14px; }
+            .day-card .day-header { padding: 14px 16px 10px; }
+            .day-card .meal-section { padding: 10px 16px 14px; }
+            .meal-item { padding: 8px 12px; }
+            .modal .modal-actions { flex-direction: column; }
+            .auth-box { padding: 24px 16px; }
         }
 
         /* ───────────── SCROLLBAR ───────────── */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: var(--badge-bg);
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: var(--text-muted);
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--text-secondary);
-        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--badge-bg); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
     </style>
 </head>
 <body>
 
-    <div class="app-wrapper" id="app">
+    <!-- ─── AUTH CONTAINER ─── -->
+    <div id="authContainer">
+        <div class="auth-box" id="authBox">
+            <h2 id="authTitle">Welcome</h2>
+            <div class="sub" id="authSub">Sign in to manage your meals</div>
+
+            <form id="authForm" onsubmit="handleAuth(event)">
+                <div class="form-group" id="nameGroup" style="display:none;">
+                    <label for="authName">Full Name</label>
+                    <input type="text" id="authName" placeholder="Your name" />
+                </div>
+                <div class="form-group">
+                    <label for="authUser">Username</label>
+                    <input type="text" id="authUser" placeholder="Choose a username" required />
+                </div>
+                <div class="form-group">
+                    <label for="authPass">Password</label>
+                    <input type="password" id="authPass" placeholder="••••••••" required />
+                </div>
+                <div class="auth-error" id="authError">Invalid credentials</div>
+                <button type="submit" class="btn btn-primary" id="authSubmitBtn">Sign In</button>
+            </form>
+
+            <div class="auth-switch">
+                <span id="authSwitchText">Don't have an account?</span>
+                <a id="authSwitchLink">Sign Up</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── APP CONTAINER (hidden until auth) ─── -->
+    <div class="app-wrapper" id="appContainer" style="display:none;">
 
         <!-- ─── HEADER ─── -->
         <header class="app-header">
-            <h1><i class="fas fa-utensils"></i> Meal Planner</h1>
+            <h1><i class="fas fa-utensils"></i> Meal Planner <span id="proBadge" class="pro-badge" style="display:none; font-size:12px; margin-left:8px;">PRO</span></h1>
             <div class="header-actions">
                 <span class="date-badge">
                     <i class="far fa-calendar-alt"></i>
@@ -660,6 +702,12 @@
                 </button>
                 <button class="btn btn-outline" onclick="resetAll()" title="Clear all meals">
                     <i class="fas fa-trash-alt"></i> Reset
+                </button>
+                <button class="btn btn-outline" onclick="upgradePro()" id="upgradeBtn" title="Upgrade to Pro">
+                    <i class="fas fa-crown"></i> Pro
+                </button>
+                <button class="btn btn-outline" onclick="logout()" title="Logout">
+                    <i class="fas fa-sign-out-alt"></i>
                 </button>
                 <button class="btn-theme" id="themeToggle" title="Toggle dark/light theme">
                     <i class="fas fa-moon" id="themeIcon"></i>
@@ -696,12 +744,11 @@
         <div class="week-grid" id="weekGrid"></div>
     </div>
 
-    <!-- ─── MODAL ─── -->
+    <!-- ─── MODAL (Add/Edit Meal) ─── -->
     <div class="modal-overlay" id="modalOverlay">
         <div class="modal">
             <div class="modal-title" id="modalTitle">Add Meal</div>
             <div class="modal-sub" id="modalSub">Fill in the details for your meal.</div>
-
             <form id="mealForm" onsubmit="saveMeal(event)">
                 <div class="form-group">
                     <label for="mealDay">Day</label>
@@ -715,7 +762,6 @@
                         <option value="saturday">Saturday</option>
                     </select>
                 </div>
-
                 <div class="form-group">
                     <label for="mealType">Meal</label>
                     <select id="mealType" required>
@@ -724,14 +770,11 @@
                         <option value="dinner">Dinner</option>
                     </select>
                 </div>
-
                 <div class="form-group">
                     <label for="mealName">Meal Name</label>
                     <input type="text" id="mealName" placeholder="e.g. Avocado Toast" required />
                 </div>
-
                 <input type="hidden" id="editIndex" value="-1" />
-
                 <div class="modal-actions">
                     <button type="button" class="btn btn-outline" onclick="closeModal()">Cancel</button>
                     <button type="submit" class="btn btn-primary" id="modalSubmitBtn">
@@ -743,9 +786,182 @@
     </div>
 
     <script>
-        // ─────────────────────────────────────────────
-        //  DATA LAYER
-        // ─────────────────────────────────────────────
+        // ─────────────────────────────────────────────────────────────
+        //  AUTH SYSTEM
+        // ─────────────────────────────────────────────────────────────
+        const AUTH_KEY = 'mealPlannerAuth';
+        const USERS_KEY = 'mealPlannerUsers';
+
+        function getUsers() {
+            return JSON.parse(localStorage.getItem(USERS_KEY)) || {};
+        }
+
+        function saveUsers(users) {
+            localStorage.setItem(USERS_KEY, JSON.stringify(users));
+        }
+
+        function getSession() {
+            return JSON.parse(localStorage.getItem(AUTH_KEY));
+        }
+
+        function setSession(username) {
+            localStorage.setItem(AUTH_KEY, JSON.stringify({ username }));
+        }
+
+        function clearSession() {
+            localStorage.removeItem(AUTH_KEY);
+        }
+
+        function getCurrentUser() {
+            const session = getSession();
+            if (!session) return null;
+            const users = getUsers();
+            return users[session.username] || null;
+        }
+
+        // Auth UI elements
+        const authContainer = document.getElementById('authContainer');
+        const appContainer = document.getElementById('appContainer');
+        const authForm = document.getElementById('authForm');
+        const authTitle = document.getElementById('authTitle');
+        const authSub = document.getElementById('authSub');
+        const authSubmitBtn = document.getElementById('authSubmitBtn');
+        const authSwitchText = document.getElementById('authSwitchText');
+        const authSwitchLink = document.getElementById('authSwitchLink');
+        const authError = document.getElementById('authError');
+        const nameGroup = document.getElementById('nameGroup');
+        const authName = document.getElementById('authName');
+        const authUser = document.getElementById('authUser');
+        const authPass = document.getElementById('authPass');
+
+        let isLogin = true;
+
+        function toggleAuthMode() {
+            isLogin = !isLogin;
+            if (isLogin) {
+                authTitle.textContent = 'Welcome';
+                authSub.textContent = 'Sign in to manage your meals';
+                authSubmitBtn.innerHTML = 'Sign In';
+                authSwitchText.textContent = "Don't have an account?";
+                authSwitchLink.textContent = 'Sign Up';
+                nameGroup.style.display = 'none';
+                authName.removeAttribute('required');
+            } else {
+                authTitle.textContent = 'Create Account';
+                authSub.textContent = 'Join and start planning your meals';
+                authSubmitBtn.innerHTML = 'Sign Up';
+                authSwitchText.textContent = 'Already have an account?';
+                authSwitchLink.textContent = 'Sign In';
+                nameGroup.style.display = 'block';
+                authName.setAttribute('required', 'required');
+            }
+            authError.style.display = 'none';
+        }
+
+        authSwitchLink.addEventListener('click', toggleAuthMode);
+
+        function handleAuth(e) {
+            e.preventDefault();
+            authError.style.display = 'none';
+
+            const username = authUser.value.trim();
+            const password = authPass.value.trim();
+            const name = authName.value.trim();
+
+            if (!username || !password) {
+                authError.textContent = 'Please fill in all fields.';
+                authError.style.display = 'block';
+                return;
+            }
+
+            const users = getUsers();
+
+            if (isLogin) {
+                if (users[username] && users[username].password === password) {
+                    setSession(username);
+                    showApp();
+                } else {
+                    authError.textContent = 'Invalid username or password.';
+                    authError.style.display = 'block';
+                }
+            } else {
+                if (users[username]) {
+                    authError.textContent = 'Username already taken.';
+                    authError.style.display = 'block';
+                    return;
+                }
+                if (!name) {
+                    authError.textContent = 'Please enter your full name.';
+                    authError.style.display = 'block';
+                    return;
+                }
+                users[username] = {
+                    name: name,
+                    password: password,
+                    pro: false
+                };
+                saveUsers(users);
+                setSession(username);
+                showApp();
+            }
+        }
+
+        function showApp() {
+            authContainer.classList.add('hidden');
+            appContainer.style.display = 'block';
+            initUserData();
+            render();
+            updateProUI();
+        }
+
+        function logout() {
+            clearSession();
+            appContainer.style.display = 'none';
+            authContainer.classList.remove('hidden');
+            authForm.reset();
+            authError.style.display = 'none';
+            isLogin = true;
+            toggleAuthMode();
+        }
+
+        function upgradePro() {
+            const user = getCurrentUser();
+            if (!user) return;
+            if (user.pro) {
+                alert('You are already a Pro user! 🎉');
+                return;
+            }
+            const users = getUsers();
+            const session = getSession();
+            if (session) {
+                users[session.username].pro = true;
+                saveUsers(users);
+                updateProUI();
+                alert('You are now a Pro user! 🎉');
+                render();
+            }
+        }
+
+        function updateProUI() {
+            const user = getCurrentUser();
+            const badge = document.getElementById('proBadge');
+            const upgradeBtn = document.getElementById('upgradeBtn');
+            if (user && user.pro) {
+                badge.style.display = 'inline';
+                upgradeBtn.innerHTML = '<i class="fas fa-crown"></i> Pro ✓';
+                upgradeBtn.disabled = true;
+                upgradeBtn.style.opacity = '0.6';
+            } else {
+                badge.style.display = 'none';
+                upgradeBtn.innerHTML = '<i class="fas fa-crown"></i> Pro';
+                upgradeBtn.disabled = false;
+                upgradeBtn.style.opacity = '1';
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────────
+        //  MEAL PLANNER DATA (per user)
+        // ─────────────────────────────────────────────────────────────
         const DAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
         const DAY_LABELS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         const MEAL_TYPES = ['breakfast', 'lunch', 'dinner'];
@@ -753,93 +969,52 @@
         const MEAL_ICONS = { breakfast: 'fa-sun', lunch: 'fa-cloud-sun', dinner: 'fa-moon' };
         const MEAL_EMOJIS = { breakfast: '🍳', lunch: '🥗', dinner: '🍝' };
 
-        // Default data (only meal names)
         const DEFAULT_DATA = {
-            sunday: {
-                breakfast: [{ name: 'Avocado Toast' }],
-                lunch: [{ name: 'Quinoa Salad' }],
-                dinner: [{ name: 'Grilled Chicken' }]
-            },
-            monday: {
-                breakfast: [{ name: 'Oatmeal with Berries' }],
-                lunch: [{ name: 'Turkey Sandwich' }],
-                dinner: [{ name: 'Salmon with Veggies' }]
-            },
-            tuesday: {
-                breakfast: [{ name: 'Greek Yogurt Parfait' }],
-                lunch: [{ name: 'Chicken Caesar Wrap' }],
-                dinner: [{ name: 'Pasta Primavera' }]
-            },
-            wednesday: {
-                breakfast: [{ name: 'Smoothie Bowl' }],
-                lunch: [{ name: 'Mediterranean Plate' }],
-                dinner: [{ name: 'Beef Stir-fry' }]
-            },
-            thursday: {
-                breakfast: [{ name: 'Eggs & Toast' }],
-                lunch: [{ name: 'Tuna Salad' }],
-                dinner: [{ name: 'Vegetable Curry' }]
-            },
-            friday: {
-                breakfast: [{ name: 'Pancakes with Syrup' }],
-                lunch: [{ name: 'Caprese Sandwich' }],
-                dinner: [{ name: 'Fish Tacos' }]
-            },
-            saturday: {
-                breakfast: [{ name: 'Fruit & Granola' }],
-                lunch: [{ name: 'Hummus Wrap' }],
-                dinner: [{ name: 'Pizza Margherita' }]
-            }
+            sunday: { breakfast: [{ name: 'Avocado Toast' }], lunch: [{ name: 'Quinoa Salad' }], dinner: [{ name: 'Grilled Chicken' }] },
+            monday: { breakfast: [{ name: 'Oatmeal with Berries' }], lunch: [{ name: 'Turkey Sandwich' }], dinner: [{ name: 'Salmon with Veggies' }] },
+            tuesday: { breakfast: [{ name: 'Greek Yogurt Parfait' }], lunch: [{ name: 'Chicken Caesar Wrap' }], dinner: [{ name: 'Pasta Primavera' }] },
+            wednesday: { breakfast: [{ name: 'Smoothie Bowl' }], lunch: [{ name: 'Mediterranean Plate' }], dinner: [{ name: 'Beef Stir-fry' }] },
+            thursday: { breakfast: [{ name: 'Eggs & Toast' }], lunch: [{ name: 'Tuna Salad' }], dinner: [{ name: 'Vegetable Curry' }] },
+            friday: { breakfast: [{ name: 'Pancakes with Syrup' }], lunch: [{ name: 'Caprese Sandwich' }], dinner: [{ name: 'Fish Tacos' }] },
+            saturday: { breakfast: [{ name: 'Fruit & Granola' }], lunch: [{ name: 'Hummus Wrap' }], dinner: [{ name: 'Pizza Margherita' }] }
         };
 
-        // ─────────────────────────────────────────────
-        //  STATE
-        // ─────────────────────────────────────────────
-        let mealData = JSON.parse(localStorage.getItem('mealPlannerData'));
+        let mealData = {};
 
-        // If no data in localStorage, use defaults
-        if (!mealData) {
-            mealData = JSON.parse(JSON.stringify(DEFAULT_DATA));
-            localStorage.setItem('mealPlannerData', JSON.stringify(mealData));
-        } else {
-            // Ensure any old data with calories/protein is cleaned (just keep name)
-            DAYS.forEach(day => {
-                MEAL_TYPES.forEach(type => {
-                    if (mealData[day] && mealData[day][type]) {
-                        mealData[day][type] = mealData[day][type].map(m => {
-                            return { name: m.name || 'Untitled' };
-                        });
-                    }
+        function getUserDataKey() {
+            const session = getSession();
+            if (!session) return null;
+            return 'mealPlannerData_' + session.username;
+        }
+
+        function initUserData() {
+            const key = getUserDataKey();
+            if (!key) return;
+            const stored = localStorage.getItem(key);
+            if (stored) {
+                mealData = JSON.parse(stored);
+                DAYS.forEach(day => {
+                    if (!mealData[day]) mealData[day] = {};
+                    MEAL_TYPES.forEach(type => {
+                        if (!mealData[day][type]) mealData[day][type] = [];
+                    });
                 });
-            });
+            } else {
+                mealData = JSON.parse(JSON.stringify(DEFAULT_DATA));
+                localStorage.setItem(key, JSON.stringify(mealData));
+            }
         }
 
-        let editingIndex = -1;
-        let editingDay = null;
-        let editingType = null;
-
-        // ─────────────────────────────────────────────
-        //  THEME TOGGLE
-        // ─────────────────────────────────────────────
-        const themeToggle = document.getElementById('themeToggle');
-        const themeIcon = document.getElementById('themeIcon');
-
-        const savedTheme = localStorage.getItem('mealPlannerTheme') || 'light';
-        if (savedTheme === 'dark') {
-            document.body.classList.add('dark-theme');
-            themeIcon.className = 'fas fa-sun';
+        function saveUserData() {
+            const key = getUserDataKey();
+            if (key) {
+                localStorage.setItem(key, JSON.stringify(mealData));
+            }
         }
 
-        themeToggle.addEventListener('click', () => {
-            document.body.classList.toggle('dark-theme');
-            const isDark = document.body.classList.contains('dark-theme');
-            themeIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
-            localStorage.setItem('mealPlannerTheme', isDark ? 'dark' : 'light');
-        });
-
-        // ─────────────────────────────────────────────
+        // ─────────────────────────────────────────────────────────────
         //  RENDER
-        // ─────────────────────────────────────────────
+        // ─────────────────────────────────────────────────────────────
         function render() {
             const grid = document.getElementById('weekGrid');
             grid.innerHTML = '';
@@ -848,11 +1023,10 @@
             let daysWithMeals = 0;
 
             DAYS.forEach((day, idx) => {
-                const dayData = mealData[day];
+                const dayData = mealData[day] || {};
                 const card = document.createElement('div');
                 card.className = 'day-card';
 
-                // ── header ──
                 const dayTotal = countMeals(dayData);
                 totalMeals += dayTotal;
                 if (dayTotal > 0) daysWithMeals++;
@@ -860,12 +1034,11 @@
                 const header = document.createElement('div');
                 header.className = 'day-header';
                 header.innerHTML = `
-              <div class="day-name">${DAY_LABELS[idx]} <span>${dayTotal} meals</span></div>
-              <div class="day-total">${dayTotal} items</div>
-            `;
+                    <div class="day-name">${DAY_LABELS[idx]} <span>${dayTotal} meals</span></div>
+                    <div class="day-total">${dayTotal} items</div>
+                `;
                 card.appendChild(header);
 
-                // ── meal sections ──
                 MEAL_TYPES.forEach((type) => {
                     const section = document.createElement('div');
                     section.className = 'meal-section';
@@ -877,12 +1050,9 @@
 
                     const labelDiv = document.createElement('div');
                     labelDiv.className = 'meal-label';
-                    labelDiv.innerHTML = `
-                <i class="fas ${icon}"></i> ${label}
-              `;
+                    labelDiv.innerHTML = `<i class="fas ${icon}"></i> ${label}`;
                     section.appendChild(labelDiv);
 
-                    // meals list
                     if (meals.length === 0) {
                         const empty = document.createElement('div');
                         empty.className = 'empty-meal';
@@ -893,23 +1063,16 @@
                             const item = document.createElement('div');
                             item.className = 'meal-item';
                             item.innerHTML = `
-                    <div class="meal-info">
-                      <div class="meal-name">${escapeHtml(meal.name)}</div>
-                    </div>
-                    <div class="meal-actions">
-                      <button class="edit-btn" onclick="editMeal('${day}','${type}',${mi})" title="Edit">
-                        <i class="fas fa-pen"></i>
-                      </button>
-                      <button class="delete-btn" onclick="deleteMeal('${day}','${type}',${mi})" title="Delete">
-                        <i class="fas fa-trash-can"></i>
-                      </button>
-                    </div>
-                  `;
+                                <div class="meal-info"><div class="meal-name">${escapeHtml(meal.name)}</div></div>
+                                <div class="meal-actions">
+                                    <button class="edit-btn" onclick="editMeal('${day}','${type}',${mi})" title="Edit"><i class="fas fa-pen"></i></button>
+                                    <button class="delete-btn" onclick="deleteMeal('${day}','${type}',${mi})" title="Delete"><i class="fas fa-trash-can"></i></button>
+                                </div>
+                            `;
                             section.appendChild(item);
                         });
                     }
 
-                    // add button
                     const addBtn = document.createElement('button');
                     addBtn.className = 'add-meal-btn';
                     addBtn.innerHTML = `<i class="fas fa-plus-circle"></i> Add ${label}`;
@@ -922,22 +1085,19 @@
                 grid.appendChild(card);
             });
 
-            // Update stats
             document.getElementById('totalMeals').textContent = totalMeals;
             document.getElementById('daysPlanned').textContent = daysWithMeals;
 
-            // Completion: % of meal slots filled (7 days * 3 meals = 21)
             const totalSlots = 21;
             let filledSlots = 0;
             DAYS.forEach(d => {
                 MEAL_TYPES.forEach(t => {
-                    if ((mealData[d][t] || []).length > 0) filledSlots++;
+                    if ((mealData[d] && mealData[d][t] && mealData[d][t].length) > 0) filledSlots++;
                 });
             });
             const pct = Math.round((filledSlots / totalSlots) * 100);
             document.getElementById('completionPct').textContent = pct + '%';
 
-            // Week label
             const now = new Date();
             const start = new Date(now);
             start.setDate(now.getDate() - now.getDay());
@@ -946,13 +1106,9 @@
             const fmt = (d) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
             document.getElementById('currentWeekLabel').textContent = `Week of ${fmt(start)} – ${fmt(end)}`;
 
-            // Save to localStorage
-            localStorage.setItem('mealPlannerData', JSON.stringify(mealData));
+            saveUserData();
         }
 
-        // ─────────────────────────────────────────────
-        //  HELPERS
-        // ─────────────────────────────────────────────
         function countMeals(day) {
             let n = 0;
             MEAL_TYPES.forEach(t => { n += (day[t] || []).length; });
@@ -965,26 +1121,18 @@
             return div.innerHTML;
         }
 
-        // ─────────────────────────────────────────────
+        // ─────────────────────────────────────────────────────────────
         //  MODAL
-        // ─────────────────────────────────────────────
+        // ─────────────────────────────────────────────────────────────
         function openModal(day, type) {
             const overlay = document.getElementById('modalOverlay');
-            const form = document.getElementById('mealForm');
-            form.reset();
-
+            document.getElementById('mealForm').reset();
             document.getElementById('editIndex').value = -1;
             document.getElementById('modalTitle').textContent = 'Add Meal';
             document.getElementById('modalSub').textContent = 'Fill in the details for your meal.';
             document.getElementById('modalSubmitBtn').innerHTML = '<i class="fas fa-save"></i> Save Meal';
-
-            if (day) {
-                document.getElementById('mealDay').value = day;
-            }
-            if (type) {
-                document.getElementById('mealType').value = type;
-            }
-
+            if (day) document.getElementById('mealDay').value = day;
+            if (type) document.getElementById('mealType').value = type;
             overlay.classList.add('active');
             document.getElementById('mealName').focus();
         }
@@ -995,46 +1143,37 @@
         }
 
         function editMeal(day, type, index) {
-            const meals = mealData[day][type] || [];
+            const meals = mealData[day] && mealData[day][type] || [];
             if (index < 0 || index >= meals.length) return;
-
             const meal = meals[index];
             document.getElementById('mealDay').value = day;
             document.getElementById('mealType').value = type;
             document.getElementById('mealName').value = meal.name || '';
             document.getElementById('editIndex').value = index;
-
             document.getElementById('modalTitle').textContent = 'Edit Meal';
             document.getElementById('modalSub').textContent = 'Update your meal details.';
             document.getElementById('modalSubmitBtn').innerHTML = '<i class="fas fa-pen"></i> Update Meal';
-
             document.getElementById('modalOverlay').classList.add('active');
             document.getElementById('mealName').focus();
         }
 
         function saveMeal(e) {
             e.preventDefault();
-
             const day = document.getElementById('mealDay').value;
             const type = document.getElementById('mealType').value;
             const name = document.getElementById('mealName').value.trim();
             const editIdx = parseInt(document.getElementById('editIndex').value);
 
-            if (!name) {
-                alert('Please enter a meal name.');
-                return;
-            }
+            if (!name) { alert('Please enter a meal name.'); return; }
 
-            if (!mealData[day]) mealData[day] = { breakfast: [], lunch: [], dinner: [] };
+            if (!mealData[day]) mealData[day] = {};
             if (!mealData[day][type]) mealData[day][type] = [];
 
             const newMeal = { name };
 
             if (editIdx >= 0 && editIdx < mealData[day][type].length) {
-                // Edit existing
                 mealData[day][type][editIdx] = newMeal;
             } else {
-                // Add new
                 mealData[day][type].push(newMeal);
             }
 
@@ -1044,7 +1183,7 @@
 
         function deleteMeal(day, type, index) {
             if (!confirm('Delete this meal?')) return;
-            const meals = mealData[day][type] || [];
+            const meals = mealData[day] && mealData[day][type] || [];
             if (index >= 0 && index < meals.length) {
                 meals.splice(index, 1);
                 render();
@@ -1054,29 +1193,109 @@
         function resetAll() {
             if (!confirm('Clear all meals and reset to default examples?')) return;
             mealData = JSON.parse(JSON.stringify(DEFAULT_DATA));
-            localStorage.setItem('mealPlannerData', JSON.stringify(mealData));
             render();
         }
 
-        // ─────────────────────────────────────────────
-        //  CLOSE MODAL ON OVERLAY CLICK
-        // ─────────────────────────────────────────────
+        // ─────────────────────────────────────────────────────────────
+        //  THEME TOGGLE
+        // ─────────────────────────────────────────────────────────────
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const savedTheme = localStorage.getItem('mealPlannerTheme') || 'light';
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-theme');
+            themeIcon.className = 'fas fa-sun';
+        }
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-theme');
+            const isDark = document.body.classList.contains('dark-theme');
+            themeIcon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+            localStorage.setItem('mealPlannerTheme', isDark ? 'dark' : 'light');
+        });
+
+        // ─────────────────────────────────────────────────────────────
+        //  CLOSE MODAL ON OVERLAY CLICK & ESC
+        // ─────────────────────────────────────────────────────────────
         document.getElementById('modalOverlay').addEventListener('click', function(e) {
             if (e.target === this) closeModal();
         });
-
-        // ─────────────────────────────────────────────
-        //  KEYBOARD SHORTCUT: ESC to close modal
-        // ─────────────────────────────────────────────
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') closeModal();
         });
 
-        // ─────────────────────────────────────────────
-        //  INIT
-        // ─────────────────────────────────────────────
-        render();
-    </script>
+        // ─────────────────────────────────────────────────────────────
+        //  PWA: INLINE MANIFEST (data URI) & SERVICE WORKER (blob)
+        // ─────────────────────────────────────────────────────────────
+        (function registerPWA() {
+            // 1. Inline manifest as data URI
+            const manifestData = {
+                name: "Meal Planner Pro",
+                short_name: "Meal Planner",
+                description: "Plan your weekly meals with ease.",
+                start_url: ".",
+                display: "standalone",
+                background_color: "#f5f7fb",
+                theme_color: "#3b82f6",
+                icons: [
+                    {
+                        src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%233b82f6'/%3E%3Ctext x='96' y='120' font-size='100' text-anchor='middle' fill='white' font-family='Arial'%3E🍽%3C/text%3E%3C/svg%3E",
+                        sizes: "192x192",
+                        type: "image/svg+xml"
+                    },
+                    {
+                        src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%233b82f6'/%3E%3Ctext x='256' y='340' font-size='280' text-anchor='middle' fill='white' font-family='Arial'%3E🍽%3C/text%3E%3C/svg%3E",
+                        sizes: "512x512",
+                        type: "image/svg+xml"
+                    }
+                ]
+            };
+            const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: 'application/json' });
+            const manifestURL = URL.createObjectURL(manifestBlob);
+            document.getElementById('manifestLink').href = manifestURL;
 
+            // 2. Service worker registration using a blob URL
+            if ('serviceWorker' in navigator) {
+                const swCode = `
+                    self.addEventListener('install', function(e) {
+                        e.waitUntil(
+                            caches.open('meal-planner-v1').then(function(cache) {
+                                return cache.addAll([
+                                    '/',
+                                    '/index.html'
+                                ]);
+                            })
+                        );
+                    });
+                    self.addEventListener('fetch', function(e) {
+                        e.respondWith(
+                            caches.match(e.request).then(function(response) {
+                                return response || fetch(e.request);
+                            })
+                        );
+                    });
+                `;
+                const swBlob = new Blob([swCode], { type: 'application/javascript' });
+                const swURL = URL.createObjectURL(swBlob);
+                navigator.serviceWorker.register(swURL)
+                    .then(() => console.log('Service Worker registered (blob)'))
+                    .catch(err => console.log('Service Worker registration failed:', err));
+            }
+        })();
+
+        // ─────────────────────────────────────────────────────────────
+        //  INIT: check session
+        // ─────────────────────────────────────────────────────────────
+        (function init() {
+            const session = getSession();
+            if (session && getUsers()[session.username]) {
+                showApp();
+            } else {
+                authContainer.classList.remove('hidden');
+                appContainer.style.display = 'none';
+                isLogin = true;
+                toggleAuthMode();
+            }
+        })();
+    </script>
 </body>
 </html>
