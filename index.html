@@ -28,12 +28,12 @@
     <script src="https://unpkg.com/lucide-react@0.292.0/dist/umd/lucide-react.min.js"></script>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useRef, useCallback, useMemo } = React;
         const { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = Recharts;
         const { ChevronLeft, ChevronRight, Search, Plus, Settings, Moon, Sun, Bell, Droplet, TrendingUp, Zap } = LucideReact;
 
         // ----------------------------------------------------------------------
-        // CONSTANTS & DATABASE
+        // CONSTANTS
         // ----------------------------------------------------------------------
         const FOOD_DATABASE = [
             { id: 1,  name: 'Chicken Breast', calories: 165, protein: 31,  carbs: 0,   fat: 3.6, fiber: 0,   emoji: '🍗' },
@@ -49,7 +49,7 @@
             { id: 11, name: 'Apple',          calories: 52,  protein: 0.3, carbs: 14,  fat: 0.2, fiber: 2.4, emoji: '🍎' },
             { id: 12, name: 'Watermelon',     calories: 30,  protein: 0.6, carbs: 7.6, fat: 0.2, fiber: 0.4, emoji: '🍉' },
             { id: 13, name: 'Eggs',           calories: 155, protein: 13,  carbs: 1.1, fat: 11,  fiber: 0,   emoji: '🥚' },
-            { id: 14, name: 'Oats',           calories: 389, protein: 17,  carbs: 66,  fat: 6.9, fiber: 10.6, emoji: '🌾' },
+            { id: 14, name: 'Oats',           calories: 389, protein: 17,  carbs: 66,  fat: 6.9, fiber: 10.6,emoji: '🌾' },
             { id: 15, name: 'Pizza',          calories: 285, protein: 12,  carbs: 36,  fat: 10,  fiber: 1.8, emoji: '🍕' },
             { id: 16, name: 'Burger',         calories: 354, protein: 17,  carbs: 35,  fat: 16,  fiber: 1.5, emoji: '🍔' },
             { id: 17, name: 'Toast',          calories: 265, protein: 9,   carbs: 49,  fat: 3.3, fiber: 2.7, emoji: '🍞' },
@@ -59,7 +59,7 @@
         const MEAL_TYPES = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];
 
         // ----------------------------------------------------------------------
-        // UTILITY FUNCTIONS (local date keys, week start)
+        // UTILITY FUNCTIONS
         // ----------------------------------------------------------------------
         function getWeekStart(date) {
             const d = new Date(date);
@@ -107,7 +107,21 @@
             const [weight, setWeight] = useState(72);
             const [healthMetrics, setHealthMetrics] = useState({ calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 });
 
-            // Recalculate daily totals whenever meals change
+            // NaN-safe weight change (Critical fix #1)
+            const lastValidWeight = useRef(72);
+            const handleWeightChange = useCallback((rawValue) => {
+                const parsed = parseFloat(rawValue);
+                if (!isNaN(parsed) && parsed > 0) {
+                    lastValidWeight.current = parsed;
+                    setWeight(parsed);
+                } else {
+                    setWeight(lastValidWeight.current); // revert to last valid
+                }
+            }, []);
+
+            const handleWaterChange = useCallback((val) => setWaterIntake(Math.min(8, Math.max(0, val))), []);
+
+            // Recalculate daily nutrition whenever meals change
             useEffect(() => {
                 const todayKey = getDateKey(new Date());
                 const todayMeals = meals[todayKey] || {};
@@ -128,7 +142,7 @@
                 setHealthMetrics(totals);
             }, [meals]);
 
-            const addFoodToMeal = (food) => {
+            const addFoodToMeal = useCallback((food) => {
                 if (!selectedDay || !selectedMeal) return;
                 const dateKey = getDateKey(selectedDay);
                 setMeals(prev => ({
@@ -138,9 +152,9 @@
                         [selectedMeal]: [...(prev[dateKey]?.[selectedMeal] || []), { ...food, id: Date.now() }],
                     },
                 }));
-            };
+            }, [selectedDay, selectedMeal]);
 
-            const removeFoodFromMeal = (dateKey, mealType, foodId) => {
+            const removeFoodFromMeal = useCallback((dateKey, mealType, foodId) => {
                 setMeals(prev => ({
                     ...prev,
                     [dateKey]: {
@@ -148,10 +162,13 @@
                         [mealType]: prev[dateKey][mealType].filter(f => f.id !== foodId),
                     },
                 }));
-            };
+            }, []);
 
-            const handleWaterChange = (val) => setWaterIntake(Math.min(8, Math.max(0, val)));
-            const handleWeightChange = (val) => setWeight(Math.max(1, val));
+            const closeModal = useCallback(() => {
+                setShowFoodSearch(false);
+                setSelectedDay(null);
+                setSelectedMeal(null);
+            }, []);
 
             return (
                 <div className={`min-h-screen transition-colors duration-300 ${darkMode ? 'bg-slate-900 text-white' : 'bg-white text-slate-900'}`}>
@@ -159,7 +176,6 @@
 
                     <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            {/* Left Column: Dashboard Widgets */}
                             <div className="lg:col-span-1 space-y-6">
                                 <GreetingCard user={user} darkMode={darkMode} />
                                 <NutritionCard metrics={healthMetrics} darkMode={darkMode} />
@@ -173,7 +189,6 @@
                                 <CalorieChart metrics={healthMetrics} darkMode={darkMode} />
                             </div>
 
-                            {/* Right Column: Weekly Meal Planner */}
                             <div className="lg:col-span-2 space-y-6">
                                 <WeekNavigator currentWeekStart={currentWeekStart} onWeekChange={setCurrentWeekStart} darkMode={darkMode} />
                                 <DietTable
@@ -190,20 +205,14 @@
                             </div>
                         </div>
 
-                        {/* Historical Charts */}
                         <ChartsSection meals={meals} currentWeekStart={currentWeekStart} darkMode={darkMode} />
                     </div>
 
-                    {/* Food Search Modal */}
                     {showFoodSearch && (
                         <FoodSearchModal
                             foods={FOOD_DATABASE}
                             onSelectFood={addFoodToMeal}
-                            onClose={() => {
-                                setShowFoodSearch(false);
-                                setSelectedDay(null);
-                                setSelectedMeal(null);
-                            }}
+                            onClose={closeModal}
                             darkMode={darkMode}
                             selectedDay={selectedDay}
                             selectedMeal={selectedMeal}
@@ -251,7 +260,6 @@
         function GreetingCard({ user, darkMode }) {
             const hour = new Date().getHours();
             const greeting = hour < 12 ? '🌅 Good Morning' : hour < 18 ? '🌤️ Good Afternoon' : '🌙 Good Evening';
-
             return (
                 <div className={`rounded-3xl p-6 backdrop-blur-xl transition-all ${darkMode 
                     ? 'bg-gradient-to-br from-slate-700/60 to-slate-800/60 border border-slate-600/50' 
@@ -311,14 +319,13 @@
         }
 
         // ----------------------------------------------------------------------
-        // HEALTH METRICS CARD (interactive)
+        // HEALTH METRICS CARD (with NaN-safe weight)
         // ----------------------------------------------------------------------
         function HealthMetricsCard({ waterIntake, weight, darkMode, onWaterChange, onWeightChange }) {
             return (
                 <div className={`rounded-3xl p-6 backdrop-blur-xl space-y-4 transition-all ${darkMode 
                     ? 'bg-gradient-to-br from-blue-500/20 to-cyan-600/20 border border-blue-500/30' 
                     : 'bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-200/50'}`}>
-                    {/* Water Intake */}
                     <div>
                         <h3 className="font-bold flex items-center gap-2 mb-3">
                             <Droplet size={20} className="text-blue-400" />
@@ -341,7 +348,6 @@
                         <p className="text-sm mt-2">{waterIntake} / 8 glasses</p>
                     </div>
 
-                    {/* Weight */}
                     <div className={`border-t ${darkMode ? 'border-slate-700/50' : 'border-slate-200/50'} pt-4`}>
                         <h3 className="font-bold flex items-center gap-2 mb-3">
                             <TrendingUp size={20} className="text-pink-400" />
@@ -351,7 +357,7 @@
                             <input
                                 type="number"
                                 value={weight}
-                                onChange={(e) => onWeightChange(Number(e.target.value))}
+                                onChange={(e) => onWeightChange(e.target.value)}
                                 className={`w-20 text-2xl font-bold bg-transparent border-b-2 ${darkMode ? 'border-blue-400 text-white' : 'border-blue-500 text-slate-900'} outline-none`}
                                 min="1"
                                 step="0.1"
@@ -365,16 +371,32 @@
         }
 
         // ----------------------------------------------------------------------
-        // MACRO DISTRIBUTION PIE CHART (absolute grams)
+        // CALORIE CHART (empty state, no fake data)
         // ----------------------------------------------------------------------
         function CalorieChart({ metrics, darkMode }) {
-            const data = [
-                { name: 'Protein', value: metrics.protein || 1 },
-                { name: 'Carbs',   value: metrics.carbs   || 1 },
-                { name: 'Fat',     value: metrics.fat     || 1 },
-                { name: 'Fiber',   value: metrics.fiber   || 1 },
-            ];
+            const total = metrics.protein + metrics.carbs + metrics.fat + metrics.fiber;
+            const data = total > 0
+                ? [
+                    { name: 'Protein', value: metrics.protein },
+                    { name: 'Carbs',   value: metrics.carbs },
+                    { name: 'Fat',     value: metrics.fat },
+                    { name: 'Fiber',   value: metrics.fiber },
+                ]
+                : [];
             const colors = ['#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];
+
+            if (data.length === 0) {
+                return (
+                    <div className={`rounded-3xl p-6 backdrop-blur-xl transition-all ${darkMode 
+                        ? 'bg-gradient-to-br from-purple-500/20 to-pink-600/20 border border-purple-500/30' 
+                        : 'bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200/50'}`}>
+                        <h3 className="font-bold mb-4">Macro Distribution</h3>
+                        <p className={`text-center py-8 text-sm opacity-50 ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                            No macros logged today
+                        </p>
+                    </div>
+                );
+            }
 
             return (
                 <div className={`rounded-3xl p-6 backdrop-blur-xl transition-all ${darkMode 
@@ -442,9 +464,46 @@
         }
 
         // ----------------------------------------------------------------------
-        // DIET TABLE
+        // DIET TABLE (with memoized rows and cells)
         // ----------------------------------------------------------------------
+        const MealCell = React.memo(({ foods, onAdd, onRemove, darkMode }) => {
+            return (
+                <div className={`min-h-[110px] rounded-xl p-2 ${darkMode ? 'bg-slate-700/30' : 'bg-slate-50'} flex flex-col justify-between`}>
+                    <div className="space-y-1 mb-2 overflow-y-auto max-h-20">
+                        {foods.map(food => (
+                            <div key={food.id} className={`text-xs p-1.5 rounded flex justify-between items-center gap-1 ${darkMode ? 'bg-slate-700/70' : 'bg-white border shadow-sm'}`}>
+                                <span className="truncate block max-w-[100px]" title={`${food.emoji} ${food.name}`}>
+                                    {food.emoji} {food.name}
+                                </span>
+                                <div className="flex items-center gap-1 shrink-0">
+                                    <span className="opacity-60">{food.calories}k</span>
+                                    <button onClick={() => onRemove(food.id)} className="text-red-400 hover:text-red-500 font-bold px-0.5" aria-label="Remove food">✕</button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    <button
+                        onClick={onAdd}
+                        className={`w-full py-1 rounded-lg flex items-center justify-center gap-1 text-xs font-medium transition-colors ${
+                            darkMode ? 'bg-slate-700 hover:bg-slate-600 text-purple-400' : 'bg-white border hover:bg-slate-50 text-purple-600'
+                        }`}
+                    >
+                        <Plus size={12} /> Add
+                    </button>
+                </div>
+            );
+        });
+
         function DietTable({ meals, currentWeekStart, onSelectMeal, onRemoveFood, darkMode }) {
+            // Memoize the overall select/remove callbacks so they don't change on every render
+            const stableOnSelect = useCallback((date, mealType) => {
+                onSelectMeal(date, mealType);
+            }, [onSelectMeal]);
+
+            const stableOnRemove = useCallback((dateKey, mealType, foodId) => {
+                onRemoveFood(dateKey, mealType, foodId);
+            }, [onRemoveFood]);
+
             return (
                 <div className={`rounded-3xl backdrop-blur-xl overflow-hidden border transition-all ${darkMode 
                     ? 'border-slate-600/50 bg-slate-800/30' 
@@ -467,31 +526,17 @@
                                     const isToday = dateKey === getDateKey(new Date());
 
                                     return (
-                                        <tr
+                                        <DietTableRow
                                             key={day}
-                                            className={`border-b transition-colors ${
-                                                isToday
-                                                    ? darkMode ? 'bg-purple-500/20' : 'bg-purple-50'
-                                                    : darkMode ? 'hover:bg-slate-700/30' : 'hover:bg-slate-50'
-                                            } ${darkMode ? 'border-slate-600/50' : 'border-slate-200/50'}`}
-                                        >
-                                            <td className={`px-6 py-4 font-bold ${isToday ? 'text-purple-400' : ''}`}>
-                                                <div>
-                                                    <p>{day}</p>
-                                                    <p className="text-xs opacity-60">{date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
-                                                </div>
-                                            </td>
-                                            {MEAL_TYPES.map(mealType => (
-                                                <td key={mealType} className="px-6 py-4 min-w-[160px]">
-                                                    <MealCell
-                                                        foods={meals[dateKey]?.[mealType] || []}
-                                                        onAdd={() => onSelectMeal(date, mealType)}
-                                                        onRemove={(foodId) => onRemoveFood(dateKey, mealType, foodId)}
-                                                        darkMode={darkMode}
-                                                    />
-                                                </td>
-                                            ))}
-                                        </tr>
+                                            day={day}
+                                            date={date}
+                                            dateKey={dateKey}
+                                            isToday={isToday}
+                                            meals={meals}
+                                            darkMode={darkMode}
+                                            onSelectMeal={stableOnSelect}
+                                            onRemoveFood={stableOnRemove}
+                                        />
                                     );
                                 })}
                             </tbody>
@@ -501,38 +546,80 @@
             );
         }
 
-        function MealCell({ foods, onAdd, onRemove, darkMode }) {
+        const DietTableRow = React.memo(({ day, date, dateKey, isToday, meals, darkMode, onSelectMeal, onRemoveFood }) => {
+            // Create stable callbacks per row using useCallback – but since the outer callbacks are stable, we can just pass them directly
+            // The cell's onAdd and onRemove need to capture dateKey and mealType. We'll create memoized wrappers using useCallback.
+            const createAddHandler = useCallback((mealType) => () => onSelectMeal(date, mealType), [onSelectMeal, date]);
+            const createRemoveHandler = useCallback((mealType) => (foodId) => onRemoveFood(dateKey, mealType, foodId), [onRemoveFood, dateKey]);
+
             return (
-                <div className={`min-h-[110px] rounded-xl p-2 ${darkMode ? 'bg-slate-700/30' : 'bg-slate-50'} flex flex-col justify-between`}>
-                    <div className="space-y-1 mb-2">
-                        {foods.map(food => (
-                            <div key={food.id} className={`text-xs p-1.5 rounded flex justify-between items-center gap-1 ${darkMode ? 'bg-slate-700/70' : 'bg-white border shadow-sm'}`}>
-                                <span className="truncate">{food.emoji} {food.name}</span>
-                                <div className="flex items-center gap-1 shrink-0">
-                                    <span className="opacity-60">{food.calories}k</span>
-                                    <button onClick={() => onRemove(food.id)} className="text-red-400 hover:text-red-500 font-bold px-0.5" aria-label="Remove food">✕</button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                    <button
-                        onClick={onAdd}
-                        className={`w-full py-1 rounded-lg flex items-center justify-center gap-1 text-xs font-medium transition-colors ${
-                            darkMode ? 'bg-slate-700 hover:bg-slate-600 text-purple-400' : 'bg-white border hover:bg-slate-50 text-purple-600'
-                        }`}
-                    >
-                        <Plus size={12} /> Add
-                    </button>
-                </div>
+                <tr
+                    className={`border-b transition-colors ${
+                        isToday
+                            ? darkMode ? 'bg-purple-500/20' : 'bg-purple-50'
+                            : darkMode ? 'hover:bg-slate-700/30' : 'hover:bg-slate-50'
+                    } ${darkMode ? 'border-slate-600/50' : 'border-slate-200/50'}`}
+                >
+                    <td className={`px-6 py-4 font-bold ${isToday ? 'text-purple-400' : ''}`}>
+                        <div>
+                            <p>{day}</p>
+                            <p className="text-xs opacity-60">{date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
+                        </div>
+                    </td>
+                    {MEAL_TYPES.map(mealType => (
+                        <td key={mealType} className="px-6 py-4 min-w-[160px]">
+                            <MealCell
+                                foods={meals[dateKey]?.[mealType] || []}
+                                onAdd={createAddHandler(mealType)}
+                                onRemove={createRemoveHandler(mealType)}
+                                darkMode={darkMode}
+                            />
+                        </td>
+                    ))}
+                </tr>
             );
-        }
+        });
 
         // ----------------------------------------------------------------------
-        // FOOD SEARCH MODAL
+        // FOOD SEARCH MODAL (with full a11y)
         // ----------------------------------------------------------------------
         function FoodSearchModal({ foods, onSelectFood, onClose, darkMode, selectedDay, selectedMeal }) {
             const [search, setSearch] = useState('');
             const [filtered, setFiltered] = useState(foods);
+            const modalRef = useRef(null);
+            const closeButtonRef = useRef(null);
+
+            // ESC key listener
+            useEffect(() => {
+                const handleKeyDown = (e) => e.key === 'Escape' && onClose();
+                document.addEventListener('keydown', handleKeyDown);
+                return () => document.removeEventListener('keydown', handleKeyDown);
+            }, [onClose]);
+
+            // Focus trap inside modal
+            useEffect(() => {
+                const handleTab = (e) => {
+                    if (!modalRef.current?.contains(e.target)) return;
+                    const focusable = modalRef.current.querySelectorAll(
+                        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                    );
+                    if (focusable.length === 0) return;
+                    const first = focusable[0];
+                    const last = focusable[focusable.length - 1];
+                    if (e.shiftKey && document.activeElement === first) {
+                        last.focus(); e.preventDefault();
+                    } else if (!e.shiftKey && document.activeElement === last) {
+                        first.focus(); e.preventDefault();
+                    }
+                };
+                document.addEventListener('keydown', handleTab);
+                return () => document.removeEventListener('keydown', handleTab);
+            }, []);
+
+            // Auto-focus close button on mount
+            useEffect(() => {
+                closeButtonRef.current?.focus();
+            }, []);
 
             useEffect(() => {
                 const q = search.toLowerCase();
@@ -544,12 +631,19 @@
                 : '';
 
             return (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                    <div className={`rounded-3xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col ${darkMode ? 'bg-slate-800 text-white' : 'bg-white text-slate-900'}`}>
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
+                    <div
+                        ref={modalRef}
+                        className={`rounded-3xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col ${darkMode ? 'bg-slate-800 text-white' : 'bg-white text-slate-900'}`}
+                        onClick={(e) => e.stopPropagation()}
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="modal-title"
+                    >
                         <div className={`p-6 border-b ${darkMode ? 'border-slate-700' : 'border-slate-200'}`}>
                             <div className="flex items-center justify-between mb-2">
-                                <h2 className="text-2xl font-bold">Add Food</h2>
-                                <button onClick={onClose} className="text-xl opacity-60 hover:opacity-100" aria-label="Close modal">✕</button>
+                                <h2 id="modal-title" className="text-2xl font-bold">Add Food</h2>
+                                <button ref={closeButtonRef} onClick={onClose} className="text-xl opacity-60 hover:opacity-100" aria-label="Close modal">✕</button>
                             </div>
                             <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
                                 {formattedDate} — {selectedMeal}
@@ -593,38 +687,37 @@
         }
 
         // ----------------------------------------------------------------------
-        // CHARTS SECTION
+        // CHARTS SECTION (with useMemo)
         // ----------------------------------------------------------------------
         function ChartsSection({ meals, currentWeekStart, darkMode }) {
-            const weekData = [];
-            const nutritionData = [];
-
-            for (let i = 0; i < 7; i++) {
-                const date = new Date(currentWeekStart);
-                date.setDate(date.getDate() + i);
-                const dateKey = getDateKey(date);
-                const dayMeals = meals[dateKey] || {};
-                let cals = 0, protein = 0, carbs = 0, fat = 0;
-
-                Object.values(dayMeals).forEach(meal => {
-                    if (Array.isArray(meal)) {
-                        meal.forEach(food => {
-                            cals += food.calories || 0;
-                            protein += food.protein || 0;
-                            carbs  += food.carbs  || 0;
-                            fat   += food.fat    || 0;
-                        });
-                    }
-                });
-
-                const dayName = WEEK_DAYS[i].substring(0, 3);
-                weekData.push({ day: dayName, calories: Math.round(cals) });
-                nutritionData.push({ day: dayName, protein: Math.round(protein), carbs: Math.round(carbs), fat: Math.round(fat) });
-            }
+            const { weekData, nutritionData } = useMemo(() => {
+                const weekData = [];
+                const nutritionData = [];
+                for (let i = 0; i < 7; i++) {
+                    const date = new Date(currentWeekStart);
+                    date.setDate(date.getDate() + i);
+                    const dateKey = getDateKey(date);
+                    const dayMeals = meals[dateKey] || {};
+                    let cals = 0, protein = 0, carbs = 0, fat = 0;
+                    Object.values(dayMeals).forEach(meal => {
+                        if (Array.isArray(meal)) {
+                            meal.forEach(food => {
+                                cals += food.calories || 0;
+                                protein += food.protein || 0;
+                                carbs  += food.carbs  || 0;
+                                fat   += food.fat    || 0;
+                            });
+                        }
+                    });
+                    const dayName = WEEK_DAYS[i].substring(0, 3);
+                    weekData.push({ day: dayName, calories: Math.round(cals) });
+                    nutritionData.push({ day: dayName, protein: Math.round(protein), carbs: Math.round(carbs), fat: Math.round(fat) });
+                }
+                return { weekData, nutritionData };
+            }, [meals, currentWeekStart]);
 
             return (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Weekly Calories Line Chart */}
                     <div className={`rounded-3xl p-6 border ${darkMode ? 'bg-slate-800/60 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
                         <h3 className="font-bold mb-4">Weekly Calories</h3>
                         <ResponsiveContainer width="100%" height={260}>
@@ -638,8 +731,6 @@
                             </LineChart>
                         </ResponsiveContainer>
                     </div>
-
-                    {/* Weekly Macros Bar Chart */}
                     <div className={`rounded-3xl p-6 border ${darkMode ? 'bg-slate-800/60 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
                         <h3 className="font-bold mb-4">Weekly Macros</h3>
                         <ResponsiveContainer width="100%" height={260}>
@@ -659,9 +750,6 @@
             );
         }
 
-        // ----------------------------------------------------------------------
-        // RENDER
-        // ----------------------------------------------------------------------
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<DietPlannerApp />);
     </script>
