@@ -291,6 +291,15 @@
             background: var(--meal-item-hover);
         }
 
+        .btn-success {
+            background: #22c55e;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #16a34a;
+            transform: translateY(-2px);
+        }
+
         .btn-theme {
             background: var(--bg-card);
             color: var(--text-secondary);
@@ -320,6 +329,11 @@
             border-radius: 100px;
             letter-spacing: 0.3px;
             text-transform: uppercase;
+        }
+
+        /* Install button */
+        #installBtn {
+            display: none; /* hidden by default, shown if PWA available */
         }
 
         /* ───────────── STATS BAR ───────────── */
@@ -706,6 +720,9 @@
                 <button class="btn btn-outline" onclick="upgradePro()" id="upgradeBtn" title="Upgrade to Pro">
                     <i class="fas fa-crown"></i> Pro
                 </button>
+                <button class="btn btn-success" id="installBtn" onclick="installApp()" title="Install App" style="display:none;">
+                    <i class="fas fa-download"></i> Install
+                </button>
                 <button class="btn btn-outline" onclick="logout()" title="Logout">
                     <i class="fas fa-sign-out-alt"></i>
                 </button>
@@ -912,6 +929,7 @@
             initUserData();
             render();
             updateProUI();
+            checkInstallability();
         }
 
         function logout() {
@@ -1224,10 +1242,54 @@
         });
 
         // ─────────────────────────────────────────────────────────────
-        //  PWA: INLINE MANIFEST (data URI) & SERVICE WORKER (blob)
+        //  PWA: INSTALL BUTTON & SERVICE WORKER
+        // ─────────────────────────────────────────────────────────────
+        let deferredPrompt = null;
+
+        // Show install button if PWA is available
+        function checkInstallability() {
+            // If already installed, hide button
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                document.getElementById('installBtn').style.display = 'none';
+                return;
+            }
+            // Otherwise, show if we have a deferred prompt (will be set later)
+            if (deferredPrompt) {
+                document.getElementById('installBtn').style.display = 'inline-flex';
+            }
+        }
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installBtn').style.display = 'inline-flex';
+        });
+
+        window.addEventListener('appinstalled', () => {
+            deferredPrompt = null;
+            document.getElementById('installBtn').style.display = 'none';
+        });
+
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the install prompt');
+                    } else {
+                        console.log('User dismissed the install prompt');
+                    }
+                    deferredPrompt = null;
+                    document.getElementById('installBtn').style.display = 'none';
+                });
+            }
+        }
+
+        // ─────────────────────────────────────────────────────────────
+        //  PWA: INLINE MANIFEST & SERVICE WORKER
         // ─────────────────────────────────────────────────────────────
         (function registerPWA() {
-            // 1. Inline manifest as data URI
+            // 1. Inline manifest as data URI (blob)
             const manifestData = {
                 name: "Meal Planner Pro",
                 short_name: "Meal Planner",
