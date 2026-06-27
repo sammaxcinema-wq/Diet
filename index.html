@@ -351,10 +351,9 @@
             text-transform: uppercase;
         }
 
-        /* Install button */
+        /* Install button – always visible by default, hidden if installed */
         #installBtn {
-            display: none;
-            /* hidden by default, shown if PWA available */;
+            display: inline-flex;
         }
 
         /* ───────────── STATS BAR ───────────── */
@@ -834,7 +833,8 @@
                 <button class="btn btn-outline" onclick="upgradePro()" id="upgradeBtn" title="Upgrade to Pro">
                     <i class="fas fa-crown"></i> Pro
                 </button>
-                <button class="btn btn-success" id="installBtn" onclick="installApp()" title="Install App" style="display:none;">
+                <!-- INSTALL BUTTON – always visible, auto-hidden if installed -->
+                <button class="btn btn-success" id="installBtn" onclick="installApp()" title="Install App">
                     <i class="fas fa-download"></i> Install
                 </button>
                 <button class="btn btn-outline" onclick="logout()" title="Logout">
@@ -1360,22 +1360,23 @@
         // ─────────────────────────────────────────────────────────────
         let deferredPrompt = null;
 
-        // Show install button if PWA is available
         function checkInstallability() {
-            // If already installed, hide button
+            const installBtn = document.getElementById('installBtn');
+            // If already installed in standalone mode, hide the button
             if (window.matchMedia('(display-mode: standalone)').matches) {
-                document.getElementById('installBtn').style.display = 'none';
+                installBtn.style.display = 'none';
                 return;
             }
-            // Otherwise, show if we have a deferred prompt (will be set later)
-            if (deferredPrompt) {
-                document.getElementById('installBtn').style.display = 'inline-flex';
-            }
+            // Otherwise, keep it visible – we'll handle click behavior
+            installBtn.style.display = 'inline-flex';
+            // If we have a deferred prompt, the button will trigger it
+            // If not, we'll show a fallback message on click
         }
 
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
+            // Ensure button is visible (in case it was hidden)
             document.getElementById('installBtn').style.display = 'inline-flex';
         });
 
@@ -1386,6 +1387,7 @@
 
         function installApp() {
             if (deferredPrompt) {
+                // Native install prompt
                 deferredPrompt.prompt();
                 deferredPrompt.userChoice.then((choiceResult) => {
                     if (choiceResult.outcome === 'accepted') {
@@ -1394,8 +1396,13 @@
                         console.log('User dismissed the install prompt');
                     }
                     deferredPrompt = null;
-                    document.getElementById('installBtn').style.display = 'none';
+                    // After prompt, we hide the button if installed or keep visible? 
+                    // We'll check again after.
+                    checkInstallability();
                 });
+            } else {
+                // Fallback for browsers that don't support beforeinstallprompt (e.g., iOS Safari)
+                alert('To install this app on your device, use your browser\'s "Add to Home Screen" or "Install App" feature.');
             }
         }
 
