@@ -46,7 +46,7 @@
             --delete-btn-hover-bg: #fee2e2;
             --delete-btn-hover-color: #ef4444;
             --auth-bg: #ffffff;
-            --auth-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            --auth-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
         }
 
         /* ───────────── DARK THEME ───────────── */
@@ -76,7 +76,7 @@
             --delete-btn-hover-bg: #3b1e1e;
             --delete-btn-hover-color: #f87171;
             --auth-bg: #1a1f2b;
-            --auth-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            --auth-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
         }
 
         /* ───────────── RESET & BASE ───────────── */
@@ -228,6 +228,26 @@
             color: var(--text-primary);
         }
 
+        .app-logo {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            object-fit: cover;
+            display: inline-block;
+            flex-shrink: 0;
+            border: 2px solid rgba(59, 130, 246, 0.20);
+            transition: border-color 0.3s;
+        }
+        .app-logo:hover {
+            border-color: var(--stat-icon-blue);
+        }
+        body.dark-theme .app-logo {
+            border-color: rgba(96, 165, 250, 0.25);
+        }
+        body.dark-theme .app-logo:hover {
+            border-color: #60a5fa;
+        }
+
         .app-header h1 i {
             color: var(--stat-icon-blue);
             font-size: 30px;
@@ -333,7 +353,8 @@
 
         /* Install button */
         #installBtn {
-            display: none; /* hidden by default, shown if PWA available */
+            display: none;
+            /* hidden by default, shown if PWA available */;
         }
 
         /* ───────────── STATS BAR ───────────── */
@@ -367,9 +388,15 @@
             flex-shrink: 0;
         }
 
-        .stat-item .icon.blue { background: var(--stat-icon-blue); }
-        .stat-item .icon.green { background: var(--stat-icon-green); }
-        .stat-item .icon.purple { background: var(--stat-icon-purple); }
+        .stat-item .icon.blue {
+            background: var(--stat-icon-blue);
+        }
+        .stat-item .icon.green {
+            background: var(--stat-icon-green);
+        }
+        .stat-item .icon.purple {
+            background: var(--stat-icon-purple);
+        }
 
         .stat-item .info .label {
             font-size: 12px;
@@ -477,8 +504,12 @@
             gap: 10px;
         }
 
-        .meal-item:last-child { margin-bottom: 0; }
-        .meal-item:hover { background: var(--meal-item-hover); }
+        .meal-item:last-child {
+            margin-bottom: 0;
+        }
+        .meal-item:hover {
+            background: var(--meal-item-hover);
+        }
 
         .meal-item .meal-info {
             flex: 1;
@@ -550,7 +581,9 @@
             margin-top: 4px;
             transition: color 0.15s;
         }
-        .add-meal-btn:hover { color: var(--add-btn-hover); }
+        .add-meal-btn:hover {
+            color: var(--add-btn-hover);
+        }
 
         /* ───────────── MODAL ───────────── */
         .modal-overlay {
@@ -568,10 +601,18 @@
             padding: 20px;
             animation: fadeIn 0.25s ease;
         }
-        .modal-overlay.active { display: flex; }
+        .modal-overlay.active {
+            display: flex;
+        }
         @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.96); }
-            to { opacity: 1; transform: scale(1); }
+            from {
+                opacity: 0;
+                transform: scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
 
         .modal {
@@ -580,7 +621,7 @@
             padding: 32px 36px;
             max-width: 480px;
             width: 100%;
-            box-shadow: 0 32px 64px rgba(0,0,0,0.20);
+            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.20);
             transition: background 0.3s;
         }
 
@@ -634,38 +675,104 @@
             gap: 12px;
             margin-top: 24px;
         }
-        .modal .modal-actions .btn { flex: 1; justify-content: center; }
+        .modal .modal-actions .btn {
+            flex: 1;
+            justify-content: center;
+        }
 
         /* ───────────── RESPONSIVE ───────────── */
         @media (max-width: 768px) {
-            .app-header h1 { font-size: 22px; }
-            .stats-bar { grid-template-columns: 1fr 1fr; padding: 14px 18px; gap: 10px; }
-            .stat-item .info .value { font-size: 17px; }
-            .week-grid { grid-template-columns: 1fr; }
-            .modal { padding: 24px 20px; }
-            .header-actions .date-badge { font-size: 12px; padding: 6px 14px; }
-            .btn { font-size: 13px; padding: 8px 16px; }
-            .auth-box { padding: 32px 20px; }
+            .app-header h1 {
+                font-size: 22px;
+            }
+            .app-logo {
+                width: 32px;
+                height: 32px;
+            }
+            .stats-bar {
+                grid-template-columns: 1fr 1fr;
+                padding: 14px 18px;
+                gap: 10px;
+            }
+            .stat-item .info .value {
+                font-size: 17px;
+            }
+            .week-grid {
+                grid-template-columns: 1fr;
+            }
+            .modal {
+                padding: 24px 20px;
+            }
+            .header-actions .date-badge {
+                font-size: 12px;
+                padding: 6px 14px;
+            }
+            .btn {
+                font-size: 13px;
+                padding: 8px 16px;
+            }
+            .auth-box {
+                padding: 32px 20px;
+            }
         }
 
         @media (max-width: 480px) {
-            body { padding: 0; }
-            .app-wrapper { padding: 12px 8px 30px; }
-            .app-header { flex-direction: column; align-items: stretch; gap: 12px; }
-            .header-actions { justify-content: space-between; flex-wrap: wrap; }
-            .stats-bar { grid-template-columns: 1fr 1fr; gap: 8px; padding: 12px 14px; }
-            .day-card .day-header { padding: 14px 16px 10px; }
-            .day-card .meal-section { padding: 10px 16px 14px; }
-            .meal-item { padding: 8px 12px; }
-            .modal .modal-actions { flex-direction: column; }
-            .auth-box { padding: 24px 16px; }
+            body {
+                padding: 0;
+            }
+            .app-wrapper {
+                padding: 12px 8px 30px;
+            }
+            .app-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+            .app-logo {
+                width: 28px;
+                height: 28px;
+            }
+            .header-actions {
+                justify-content: space-between;
+                flex-wrap: wrap;
+            }
+            .stats-bar {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+                padding: 12px 14px;
+            }
+            .day-card .day-header {
+                padding: 14px 16px 10px;
+            }
+            .day-card .meal-section {
+                padding: 10px 16px 14px;
+            }
+            .meal-item {
+                padding: 8px 12px;
+            }
+            .modal .modal-actions {
+                flex-direction: column;
+            }
+            .auth-box {
+                padding: 24px 16px;
+            }
         }
 
         /* ───────────── SCROLLBAR ───────────── */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: var(--badge-bg); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--badge-bg);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--text-muted);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
     </style>
 </head>
 <body>
@@ -705,7 +812,14 @@
 
         <!-- ─── HEADER ─── -->
         <header class="app-header">
-            <h1><i class="fas fa-utensils"></i> Meal Planner <span id="proBadge" class="pro-badge" style="display:none; font-size:12px; margin-left:8px;">PRO</span></h1>
+            <h1>
+                <img
+                src="https://i.ibb.co/gLXWj0Tn/c8a71cc8d8bc8e067883b4c4f4d184b0.jpg"
+                alt="Meal Planner Logo"
+                class="app-logo"
+                />
+                Meal Planner <span id="proBadge" class="pro-badge" style="display:none; font-size:12px; margin-left:8px;">PRO</span>
+            </h1>
             <div class="header-actions">
                 <span class="date-badge">
                     <i class="far fa-calendar-alt"></i>
@@ -1052,9 +1166,9 @@
                 const header = document.createElement('div');
                 header.className = 'day-header';
                 header.innerHTML = `
-                    <div class="day-name">${DAY_LABELS[idx]} <span>${dayTotal} meals</span></div>
-                    <div class="day-total">${dayTotal} items</div>
-                `;
+                            <div class="day-name">${DAY_LABELS[idx]} <span>${dayTotal} meals</span></div>
+                            <div class="day-total">${dayTotal} items</div>
+                        `;
                 card.appendChild(header);
 
                 MEAL_TYPES.forEach((type) => {
@@ -1081,12 +1195,12 @@
                             const item = document.createElement('div');
                             item.className = 'meal-item';
                             item.innerHTML = `
-                                <div class="meal-info"><div class="meal-name">${escapeHtml(meal.name)}</div></div>
-                                <div class="meal-actions">
-                                    <button class="edit-btn" onclick="editMeal('${day}','${type}',${mi})" title="Edit"><i class="fas fa-pen"></i></button>
-                                    <button class="delete-btn" onclick="deleteMeal('${day}','${type}',${mi})" title="Delete"><i class="fas fa-trash-can"></i></button>
-                                </div>
-                            `;
+                                        <div class="meal-info"><div class="meal-name">${escapeHtml(meal.name)}</div></div>
+                                        <div class="meal-actions">
+                                            <button class="edit-btn" onclick="editMeal('${day}','${type}',${mi})" title="Edit"><i class="fas fa-pen"></i></button>
+                                            <button class="delete-btn" onclick="deleteMeal('${day}','${type}',${mi})" title="Delete"><i class="fas fa-trash-can"></i></button>
+                                        </div>
+                                    `;
                             section.appendChild(item);
                         });
                     }
@@ -1289,7 +1403,7 @@
         //  PWA: INLINE MANIFEST & SERVICE WORKER
         // ─────────────────────────────────────────────────────────────
         (function registerPWA() {
-            // 1. Inline manifest as data URI (blob)
+            // 1. Inline manifest as data URI (blob) — using the custom logo
             const manifestData = {
                 name: "Meal Planner Pro",
                 short_name: "Meal Planner",
@@ -1298,18 +1412,17 @@
                 display: "standalone",
                 background_color: "#f5f7fb",
                 theme_color: "#3b82f6",
-                icons: [
-                    {
-                        src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%233b82f6'/%3E%3Ctext x='96' y='120' font-size='100' text-anchor='middle' fill='white' font-family='Arial'%3E🍽%3C/text%3E%3C/svg%3E",
-                        sizes: "192x192",
-                        type: "image/svg+xml"
-                    },
-                    {
-                        src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%233b82f6'/%3E%3Ctext x='256' y='340' font-size='280' text-anchor='middle' fill='white' font-family='Arial'%3E🍽%3C/text%3E%3C/svg%3E",
-                        sizes: "512x512",
-                        type: "image/svg+xml"
-                    }
-                ]
+                icons: [{
+                    src: "https://i.ibb.co/gLXWj0Tn/c8a71cc8d8bc8e067883b4c4f4d184b0.jpg",
+                    sizes: "192x192",
+                    type: "image/jpeg",
+                    purpose: "any maskable"
+                }, {
+                    src: "https://i.ibb.co/gLXWj0Tn/c8a71cc8d8bc8e067883b4c4f4d184b0.jpg",
+                    sizes: "512x512",
+                    type: "image/jpeg",
+                    purpose: "any maskable"
+                }]
             };
             const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: 'application/json' });
             const manifestURL = URL.createObjectURL(manifestBlob);
@@ -1318,24 +1431,24 @@
             // 2. Service worker registration using a blob URL
             if ('serviceWorker' in navigator) {
                 const swCode = `
-                    self.addEventListener('install', function(e) {
-                        e.waitUntil(
-                            caches.open('meal-planner-v1').then(function(cache) {
-                                return cache.addAll([
-                                    '/',
-                                    '/index.html'
-                                ]);
-                            })
-                        );
-                    });
-                    self.addEventListener('fetch', function(e) {
-                        e.respondWith(
-                            caches.match(e.request).then(function(response) {
-                                return response || fetch(e.request);
-                            })
-                        );
-                    });
-                `;
+                            self.addEventListener('install', function(e) {
+                                e.waitUntil(
+                                    caches.open('meal-planner-v1').then(function(cache) {
+                                        return cache.addAll([
+                                            '/',
+                                            '/index.html'
+                                        ]);
+                                    })
+                                );
+                            });
+                            self.addEventListener('fetch', function(e) {
+                                e.respondWith(
+                                    caches.match(e.request).then(function(response) {
+                                        return response || fetch(e.request);
+                                    })
+                                );
+                            });
+                        `;
                 const swBlob = new Blob([swCode], { type: 'application/javascript' });
                 const swURL = URL.createObjectURL(swBlob);
                 navigator.serviceWorker.register(swURL)
