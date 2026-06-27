@@ -309,12 +309,10 @@
         .btn-success {
             background: #22c55e;
             color: white;
-            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.30);
         }
         .btn-success:hover {
             background: #16a34a;
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(34, 197, 94, 0.35);
         }
 
         .btn-theme {
@@ -348,25 +346,10 @@
             text-transform: uppercase;
         }
 
-        /* ─── INSTALL BUTTON PULSE ─── */
+        /* Install button */
         #installBtn {
             display: none;
-            animation: pulse-install 2s ease-in-out infinite;
-        }
-        #installBtn.show {
-            display: inline-flex;
-        }
-        @keyframes pulse-install {
-            0%,
-            100% {
-                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
-            }
-            50% {
-                box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
-            }
-        }
-        #installBtn.show:hover {
-            animation: none;
+            /* hidden by default, shown when PWA install is available */
         }
 
         /* ───────────── STATS BAR ───────────── */
@@ -400,15 +383,9 @@
             flex-shrink: 0;
         }
 
-        .stat-item .icon.blue {
-            background: var(--stat-icon-blue);
-        }
-        .stat-item .icon.green {
-            background: var(--stat-icon-green);
-        }
-        .stat-item .icon.purple {
-            background: var(--stat-icon-purple);
-        }
+        .stat-item .icon.blue { background: var(--stat-icon-blue); }
+        .stat-item .icon.green { background: var(--stat-icon-green); }
+        .stat-item .icon.purple { background: var(--stat-icon-purple); }
 
         .stat-item .info .label {
             font-size: 12px;
@@ -516,12 +493,8 @@
             gap: 10px;
         }
 
-        .meal-item:last-child {
-            margin-bottom: 0;
-        }
-        .meal-item:hover {
-            background: var(--meal-item-hover);
-        }
+        .meal-item:last-child { margin-bottom: 0; }
+        .meal-item:hover { background: var(--meal-item-hover); }
 
         .meal-item .meal-info {
             flex: 1;
@@ -593,9 +566,7 @@
             margin-top: 4px;
             transition: color 0.15s;
         }
-        .add-meal-btn:hover {
-            color: var(--add-btn-hover);
-        }
+        .add-meal-btn:hover { color: var(--add-btn-hover); }
 
         /* ───────────── MODAL ───────────── */
         .modal-overlay {
@@ -613,18 +584,10 @@
             padding: 20px;
             animation: fadeIn 0.25s ease;
         }
-        .modal-overlay.active {
-            display: flex;
-        }
+        .modal-overlay.active { display: flex; }
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.96);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
         }
 
         .modal {
@@ -633,7 +596,7 @@
             padding: 32px 36px;
             max-width: 480px;
             width: 100%;
-            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.20);
+            box-shadow: 0 32px 64px rgba(0,0,0,0.20);
             transition: background 0.3s;
         }
 
@@ -687,104 +650,40 @@
             gap: 12px;
             margin-top: 24px;
         }
-        .modal .modal-actions .btn {
-            flex: 1;
-            justify-content: center;
-        }
+        .modal .modal-actions .btn { flex: 1; justify-content: center; }
 
         /* ───────────── RESPONSIVE ───────────── */
         @media (max-width: 768px) {
-            .app-header h1 {
-                font-size: 22px;
-            }
-            .app-logo {
-                width: 32px;
-                height: 32px;
-            }
-            .stats-bar {
-                grid-template-columns: 1fr 1fr;
-                padding: 14px 18px;
-                gap: 10px;
-            }
-            .stat-item .info .value {
-                font-size: 17px;
-            }
-            .week-grid {
-                grid-template-columns: 1fr;
-            }
-            .modal {
-                padding: 24px 20px;
-            }
-            .header-actions .date-badge {
-                font-size: 12px;
-                padding: 6px 14px;
-            }
-            .btn {
-                font-size: 13px;
-                padding: 8px 16px;
-            }
-            .auth-box {
-                padding: 32px 20px;
-            }
+            .app-header h1 { font-size: 22px; }
+            .app-logo { width: 32px; height: 32px; }
+            .stats-bar { grid-template-columns: 1fr 1fr; padding: 14px 18px; gap: 10px; }
+            .stat-item .info .value { font-size: 17px; }
+            .week-grid { grid-template-columns: 1fr; }
+            .modal { padding: 24px 20px; }
+            .header-actions .date-badge { font-size: 12px; padding: 6px 14px; }
+            .btn { font-size: 13px; padding: 8px 16px; }
+            .auth-box { padding: 32px 20px; }
         }
 
         @media (max-width: 480px) {
-            body {
-                padding: 0;
-            }
-            .app-wrapper {
-                padding: 12px 8px 30px;
-            }
-            .app-header {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 12px;
-            }
-            .app-logo {
-                width: 28px;
-                height: 28px;
-            }
-            .header-actions {
-                justify-content: space-between;
-                flex-wrap: wrap;
-            }
-            .stats-bar {
-                grid-template-columns: 1fr 1fr;
-                gap: 8px;
-                padding: 12px 14px;
-            }
-            .day-card .day-header {
-                padding: 14px 16px 10px;
-            }
-            .day-card .meal-section {
-                padding: 10px 16px 14px;
-            }
-            .meal-item {
-                padding: 8px 12px;
-            }
-            .modal .modal-actions {
-                flex-direction: column;
-            }
-            .auth-box {
-                padding: 24px 16px;
-            }
+            body { padding: 0; }
+            .app-wrapper { padding: 12px 8px 30px; }
+            .app-header { flex-direction: column; align-items: stretch; gap: 12px; }
+            .app-logo { width: 28px; height: 28px; }
+            .header-actions { justify-content: space-between; flex-wrap: wrap; }
+            .stats-bar { grid-template-columns: 1fr 1fr; gap: 8px; padding: 12px 14px; }
+            .day-card .day-header { padding: 14px 16px 10px; }
+            .day-card .meal-section { padding: 10px 16px 14px; }
+            .meal-item { padding: 8px 12px; }
+            .modal .modal-actions { flex-direction: column; }
+            .auth-box { padding: 24px 16px; }
         }
 
         /* ───────────── SCROLLBAR ───────────── */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: var(--badge-bg);
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: var(--text-muted);
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--text-secondary);
-        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--badge-bg); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: var(--text-muted); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
     </style>
 </head>
 <body>
@@ -819,14 +718,18 @@
         </div>
     </div>
 
-    <!-- ─── APP CONTAINER ─── -->
+    <!-- ─── APP CONTAINER (hidden until auth) ─── -->
     <div class="app-wrapper" id="appContainer" style="display:none;">
 
         <!-- ─── HEADER ─── -->
         <header class="app-header">
             <h1>
-                <img src="https://i.ibb.co/gLXWj0Tn/c8a71cc8d8bc8e067883b4c4f4d184b0.jpg" alt="Meal Planner Logo" class="app-logo" />
-                Meal Planner <span id="proBadge" class="pro-badge" style="display:none; margin-left:8px;">PRO</span>
+                <img
+                src="https://i.ibb.co/gLXWj0Tn/c8a71cc8d8bc8e067883b4c4f4d184b0.jpg"
+                alt="Meal Planner Logo"
+                class="app-logo"
+                />
+                Meal Planner <span id="proBadge" class="pro-badge" style="display:none; font-size:12px; margin-left:8px;">PRO</span>
             </h1>
             <div class="header-actions">
                 <span class="date-badge">
@@ -842,6 +745,7 @@
                 <button class="btn btn-outline" onclick="upgradePro()" id="upgradeBtn" title="Upgrade to Pro">
                     <i class="fas fa-crown"></i> Pro
                 </button>
+                <!-- INSTALL BUTTON – appears only when PWA install is supported -->
                 <button class="btn btn-success" id="installBtn" onclick="installApp()" title="Install App">
                     <i class="fas fa-download"></i> Install
                 </button>
@@ -883,7 +787,7 @@
         <div class="week-grid" id="weekGrid"></div>
     </div>
 
-    <!-- ─── MODAL ─── -->
+    <!-- ─── MODAL (Add/Edit Meal) ─── -->
     <div class="modal-overlay" id="modalOverlay">
         <div class="modal">
             <div class="modal-title" id="modalTitle">Add Meal</div>
@@ -958,6 +862,7 @@
             return users[session.username] || null;
         }
 
+        // Auth UI elements
         const authContainer = document.getElementById('authContainer');
         const appContainer = document.getElementById('appContainer');
         const authForm = document.getElementById('authForm');
@@ -1050,7 +955,7 @@
             initUserData();
             render();
             updateProUI();
-            checkInstallability();
+            checkInstallability(); // show install button if available
         }
 
         function logout() {
@@ -1099,7 +1004,7 @@
         }
 
         // ─────────────────────────────────────────────────────────────
-        //  MEAL PLANNER DATA
+        //  MEAL PLANNER DATA (per user)
         // ─────────────────────────────────────────────────────────────
         const DAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
         const DAY_LABELS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -1109,20 +1014,13 @@
         const MEAL_EMOJIS = { breakfast: '🍳', lunch: '🥗', dinner: '🍝' };
 
         const DEFAULT_DATA = {
-            sunday: { breakfast: [{ name: 'Avocado Toast' }], lunch: [{ name: 'Quinoa Salad' }],
-            dinner: [{ name: 'Grilled Chicken' }] },
-            monday: { breakfast: [{ name: 'Oatmeal with Berries' }], lunch: [{ name: 'Turkey Sandwich' }],
-            dinner: [{ name: 'Salmon with Veggies' }] },
-            tuesday: { breakfast: [{ name: 'Greek Yogurt Parfait' }], lunch: [{ name: 'Chicken Caesar Wrap' }],
-            dinner: [{ name: 'Pasta Primavera' }] },
-            wednesday: { breakfast: [{ name: 'Smoothie Bowl' }], lunch: [{ name: 'Mediterranean Plate' }],
-            dinner: [{ name: 'Beef Stir-fry' }] },
-            thursday: { breakfast: [{ name: 'Eggs & Toast' }], lunch: [{ name: 'Tuna Salad' }],
-            dinner: [{ name: 'Vegetable Curry' }] },
-            friday: { breakfast: [{ name: 'Pancakes with Syrup' }], lunch: [{ name: 'Caprese Sandwich' }],
-            dinner: [{ name: 'Fish Tacos' }] },
-            saturday: { breakfast: [{ name: 'Fruit & Granola' }], lunch: [{ name: 'Hummus Wrap' }],
-            dinner: [{ name: 'Pizza Margherita' }] }
+            sunday: { breakfast: [{ name: 'Avocado Toast' }], lunch: [{ name: 'Quinoa Salad' }], dinner: [{ name: 'Grilled Chicken' }] },
+            monday: { breakfast: [{ name: 'Oatmeal with Berries' }], lunch: [{ name: 'Turkey Sandwich' }], dinner: [{ name: 'Salmon with Veggies' }] },
+            tuesday: { breakfast: [{ name: 'Greek Yogurt Parfait' }], lunch: [{ name: 'Chicken Caesar Wrap' }], dinner: [{ name: 'Pasta Primavera' }] },
+            wednesday: { breakfast: [{ name: 'Smoothie Bowl' }], lunch: [{ name: 'Mediterranean Plate' }], dinner: [{ name: 'Beef Stir-fry' }] },
+            thursday: { breakfast: [{ name: 'Eggs & Toast' }], lunch: [{ name: 'Tuna Salad' }], dinner: [{ name: 'Vegetable Curry' }] },
+            friday: { breakfast: [{ name: 'Pancakes with Syrup' }], lunch: [{ name: 'Caprese Sandwich' }], dinner: [{ name: 'Fish Tacos' }] },
+            saturday: { breakfast: [{ name: 'Fruit & Granola' }], lunch: [{ name: 'Hummus Wrap' }], dinner: [{ name: 'Pizza Margherita' }] }
         };
 
         let mealData = {};
@@ -1180,9 +1078,9 @@
                 const header = document.createElement('div');
                 header.className = 'day-header';
                 header.innerHTML = `
-                            <div class="day-name">${DAY_LABELS[idx]} <span>${dayTotal} meals</span></div>
-                            <div class="day-total">${dayTotal} items</div>
-                        `;
+                    <div class="day-name">${DAY_LABELS[idx]} <span>${dayTotal} meals</span></div>
+                    <div class="day-total">${dayTotal} items</div>
+                `;
                 card.appendChild(header);
 
                 MEAL_TYPES.forEach((type) => {
@@ -1209,12 +1107,12 @@
                             const item = document.createElement('div');
                             item.className = 'meal-item';
                             item.innerHTML = `
-                                        <div class="meal-info"><div class="meal-name">${escapeHtml(meal.name)}</div></div>
-                                        <div class="meal-actions">
-                                            <button class="edit-btn" onclick="editMeal('${day}','${type}',${mi})" title="Edit"><i class="fas fa-pen"></i></button>
-                                            <button class="delete-btn" onclick="deleteMeal('${day}','${type}',${mi})" title="Delete"><i class="fas fa-trash-can"></i></button>
-                                        </div>
-                                    `;
+                                <div class="meal-info"><div class="meal-name">${escapeHtml(meal.name)}</div></div>
+                                <div class="meal-actions">
+                                    <button class="edit-btn" onclick="editMeal('${day}','${type}',${mi})" title="Edit"><i class="fas fa-pen"></i></button>
+                                    <button class="delete-btn" onclick="deleteMeal('${day}','${type}',${mi})" title="Delete"><i class="fas fa-trash-can"></i></button>
+                                </div>
+                            `;
                             section.appendChild(item);
                         });
                     }
@@ -1370,39 +1268,40 @@
         });
 
         // ─────────────────────────────────────────────────────────────
-        //  PWA: INSTALL BUTTON
+        //  PWA: INSTALL BUTTON & SERVICE WORKER
         // ─────────────────────────────────────────────────────────────
         let deferredPrompt = null;
-        const installBtn = document.getElementById('installBtn');
 
+        // Show install button if PWA is available
         function checkInstallability() {
-            // Hide if already installed as standalone
+            // If already installed, hide button
             if (window.matchMedia('(display-mode: standalone)').matches) {
-                installBtn.classList.remove('show');
-                installBtn.style.display = 'none';
+                document.getElementById('installBtn').style.display = 'none';
                 return;
             }
-            // Show if we have a deferred prompt
+            // Otherwise, show if we have a deferred prompt
             if (deferredPrompt) {
-                installBtn.style.display = 'inline-flex';
-                installBtn.classList.add('show');
+                document.getElementById('installBtn').style.display = 'inline-flex';
+                console.log('Install button shown');
             } else {
-                installBtn.classList.remove('show');
-                installBtn.style.display = 'none';
+                document.getElementById('installBtn').style.display = 'none';
             }
         }
 
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            checkInstallability();
+            // If the app is already visible, show the button immediately
+            if (appContainer.style.display !== 'none') {
+                document.getElementById('installBtn').style.display = 'inline-flex';
+            }
+            console.log('beforeinstallprompt fired');
         });
 
         window.addEventListener('appinstalled', () => {
             deferredPrompt = null;
-            installBtn.classList.remove('show');
-            installBtn.style.display = 'none';
-            console.log('📲 App installed successfully!');
+            document.getElementById('installBtn').style.display = 'none';
+            console.log('App installed');
         });
 
         function installApp() {
@@ -1410,25 +1309,23 @@
                 deferredPrompt.prompt();
                 deferredPrompt.userChoice.then((choiceResult) => {
                     if (choiceResult.outcome === 'accepted') {
-                        console.log('✅ User accepted the install prompt');
+                        console.log('User accepted the install prompt');
                     } else {
-                        console.log('❌ User dismissed the install prompt');
+                        console.log('User dismissed the install prompt');
                     }
                     deferredPrompt = null;
-                    installBtn.classList.remove('show');
-                    installBtn.style.display = 'none';
+                    document.getElementById('installBtn').style.display = 'none';
                 });
             } else {
-                // Fallback: show a message or open browser install flow
-                alert('Installation is not available right now. Try opening this page in Chrome or Edge and look for the install icon in the address bar.');
+                alert('Installation is not available. You can add this page to your home screen manually.');
             }
         }
 
         // ─────────────────────────────────────────────────────────────
-        //  PWA: MANIFEST & SERVICE WORKER
+        //  PWA: INLINE MANIFEST & SERVICE WORKER
         // ─────────────────────────────────────────────────────────────
         (function registerPWA() {
-            // 1. Inline manifest with custom logo
+            // 1. Inline manifest with the custom logo
             const manifestData = {
                 name: "Meal Planner Pro",
                 short_name: "Meal Planner",
@@ -1453,37 +1350,37 @@
             const manifestURL = URL.createObjectURL(manifestBlob);
             document.getElementById('manifestLink').href = manifestURL;
 
-            // 2. Service worker
+            // 2. Service worker registration using a blob URL
             if ('serviceWorker' in navigator) {
                 const swCode = `
-                            self.addEventListener('install', function(e) {
-                                e.waitUntil(
-                                    caches.open('meal-planner-v2').then(function(cache) {
-                                        return cache.addAll([
-                                            '/',
-                                            '/index.html'
-                                        ]);
-                                    })
-                                );
-                            });
-                            self.addEventListener('fetch', function(e) {
-                                e.respondWith(
-                                    caches.match(e.request).then(function(response) {
-                                        return response || fetch(e.request);
-                                    })
-                                );
-                            });
-                        `;
+                    self.addEventListener('install', function(e) {
+                        e.waitUntil(
+                            caches.open('meal-planner-v1').then(function(cache) {
+                                return cache.addAll([
+                                    '/',
+                                    '/index.html'
+                                ]);
+                            })
+                        );
+                    });
+                    self.addEventListener('fetch', function(e) {
+                        e.respondWith(
+                            caches.match(e.request).then(function(response) {
+                                return response || fetch(e.request);
+                            })
+                        );
+                    });
+                `;
                 const swBlob = new Blob([swCode], { type: 'application/javascript' });
                 const swURL = URL.createObjectURL(swBlob);
                 navigator.serviceWorker.register(swURL)
-                    .then(() => console.log('✅ Service Worker registered'))
-                    .catch(err => console.log('❌ Service Worker registration failed:', err));
+                    .then(() => console.log('Service Worker registered (blob)'))
+                    .catch(err => console.log('Service Worker registration failed:', err));
             }
         })();
 
         // ─────────────────────────────────────────────────────────────
-        //  INIT
+        //  INIT: check session
         // ─────────────────────────────────────────────────────────────
         (function init() {
             const session = getSession();
