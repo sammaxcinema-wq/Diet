@@ -248,11 +248,6 @@
             border-color: #60a5fa;
         }
 
-        .app-header h1 i {
-            color: var(--stat-icon-blue);
-            font-size: 30px;
-        }
-
         .header-actions {
             display: flex;
             flex-wrap: wrap;
@@ -314,10 +309,12 @@
         .btn-success {
             background: #22c55e;
             color: white;
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.30);
         }
         .btn-success:hover {
             background: #16a34a;
             transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(34, 197, 94, 0.35);
         }
 
         .btn-theme {
@@ -351,9 +348,25 @@
             text-transform: uppercase;
         }
 
-        /* Install button – always visible by default, hidden if installed */
+        /* ─── INSTALL BUTTON PULSE ─── */
         #installBtn {
+            display: none;
+            animation: pulse-install 2s ease-in-out infinite;
+        }
+        #installBtn.show {
             display: inline-flex;
+        }
+        @keyframes pulse-install {
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
+            }
+        }
+        #installBtn.show:hover {
+            animation: none;
         }
 
         /* ───────────── STATS BAR ───────────── */
@@ -806,18 +819,14 @@
         </div>
     </div>
 
-    <!-- ─── APP CONTAINER (hidden until auth) ─── -->
+    <!-- ─── APP CONTAINER ─── -->
     <div class="app-wrapper" id="appContainer" style="display:none;">
 
         <!-- ─── HEADER ─── -->
         <header class="app-header">
             <h1>
-                <img
-                src="https://i.ibb.co/gLXWj0Tn/c8a71cc8d8bc8e067883b4c4f4d184b0.jpg"
-                alt="Meal Planner Logo"
-                class="app-logo"
-                />
-                Meal Planner <span id="proBadge" class="pro-badge" style="display:none; font-size:12px; margin-left:8px;">PRO</span>
+                <img src="https://i.ibb.co/gLXWj0Tn/c8a71cc8d8bc8e067883b4c4f4d184b0.jpg" alt="Meal Planner Logo" class="app-logo" />
+                Meal Planner <span id="proBadge" class="pro-badge" style="display:none; margin-left:8px;">PRO</span>
             </h1>
             <div class="header-actions">
                 <span class="date-badge">
@@ -833,7 +842,6 @@
                 <button class="btn btn-outline" onclick="upgradePro()" id="upgradeBtn" title="Upgrade to Pro">
                     <i class="fas fa-crown"></i> Pro
                 </button>
-                <!-- INSTALL BUTTON – always visible, auto-hidden if installed -->
                 <button class="btn btn-success" id="installBtn" onclick="installApp()" title="Install App">
                     <i class="fas fa-download"></i> Install
                 </button>
@@ -875,7 +883,7 @@
         <div class="week-grid" id="weekGrid"></div>
     </div>
 
-    <!-- ─── MODAL (Add/Edit Meal) ─── -->
+    <!-- ─── MODAL ─── -->
     <div class="modal-overlay" id="modalOverlay">
         <div class="modal">
             <div class="modal-title" id="modalTitle">Add Meal</div>
@@ -950,7 +958,6 @@
             return users[session.username] || null;
         }
 
-        // Auth UI elements
         const authContainer = document.getElementById('authContainer');
         const appContainer = document.getElementById('appContainer');
         const authForm = document.getElementById('authForm');
@@ -1092,7 +1099,7 @@
         }
 
         // ─────────────────────────────────────────────────────────────
-        //  MEAL PLANNER DATA (per user)
+        //  MEAL PLANNER DATA
         // ─────────────────────────────────────────────────────────────
         const DAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
         const DAY_LABELS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -1102,13 +1109,20 @@
         const MEAL_EMOJIS = { breakfast: '🍳', lunch: '🥗', dinner: '🍝' };
 
         const DEFAULT_DATA = {
-            sunday: { breakfast: [{ name: 'Avocado Toast' }], lunch: [{ name: 'Quinoa Salad' }], dinner: [{ name: 'Grilled Chicken' }] },
-            monday: { breakfast: [{ name: 'Oatmeal with Berries' }], lunch: [{ name: 'Turkey Sandwich' }], dinner: [{ name: 'Salmon with Veggies' }] },
-            tuesday: { breakfast: [{ name: 'Greek Yogurt Parfait' }], lunch: [{ name: 'Chicken Caesar Wrap' }], dinner: [{ name: 'Pasta Primavera' }] },
-            wednesday: { breakfast: [{ name: 'Smoothie Bowl' }], lunch: [{ name: 'Mediterranean Plate' }], dinner: [{ name: 'Beef Stir-fry' }] },
-            thursday: { breakfast: [{ name: 'Eggs & Toast' }], lunch: [{ name: 'Tuna Salad' }], dinner: [{ name: 'Vegetable Curry' }] },
-            friday: { breakfast: [{ name: 'Pancakes with Syrup' }], lunch: [{ name: 'Caprese Sandwich' }], dinner: [{ name: 'Fish Tacos' }] },
-            saturday: { breakfast: [{ name: 'Fruit & Granola' }], lunch: [{ name: 'Hummus Wrap' }], dinner: [{ name: 'Pizza Margherita' }] }
+            sunday: { breakfast: [{ name: 'Avocado Toast' }], lunch: [{ name: 'Quinoa Salad' }],
+            dinner: [{ name: 'Grilled Chicken' }] },
+            monday: { breakfast: [{ name: 'Oatmeal with Berries' }], lunch: [{ name: 'Turkey Sandwich' }],
+            dinner: [{ name: 'Salmon with Veggies' }] },
+            tuesday: { breakfast: [{ name: 'Greek Yogurt Parfait' }], lunch: [{ name: 'Chicken Caesar Wrap' }],
+            dinner: [{ name: 'Pasta Primavera' }] },
+            wednesday: { breakfast: [{ name: 'Smoothie Bowl' }], lunch: [{ name: 'Mediterranean Plate' }],
+            dinner: [{ name: 'Beef Stir-fry' }] },
+            thursday: { breakfast: [{ name: 'Eggs & Toast' }], lunch: [{ name: 'Tuna Salad' }],
+            dinner: [{ name: 'Vegetable Curry' }] },
+            friday: { breakfast: [{ name: 'Pancakes with Syrup' }], lunch: [{ name: 'Caprese Sandwich' }],
+            dinner: [{ name: 'Fish Tacos' }] },
+            saturday: { breakfast: [{ name: 'Fruit & Granola' }], lunch: [{ name: 'Hummus Wrap' }],
+            dinner: [{ name: 'Pizza Margherita' }] }
         };
 
         let mealData = {};
@@ -1356,61 +1370,65 @@
         });
 
         // ─────────────────────────────────────────────────────────────
-        //  PWA: INSTALL BUTTON & SERVICE WORKER
+        //  PWA: INSTALL BUTTON
         // ─────────────────────────────────────────────────────────────
         let deferredPrompt = null;
+        const installBtn = document.getElementById('installBtn');
 
         function checkInstallability() {
-            const installBtn = document.getElementById('installBtn');
-            // If already installed in standalone mode, hide the button
+            // Hide if already installed as standalone
             if (window.matchMedia('(display-mode: standalone)').matches) {
+                installBtn.classList.remove('show');
                 installBtn.style.display = 'none';
                 return;
             }
-            // Otherwise, keep it visible – we'll handle click behavior
-            installBtn.style.display = 'inline-flex';
-            // If we have a deferred prompt, the button will trigger it
-            // If not, we'll show a fallback message on click
+            // Show if we have a deferred prompt
+            if (deferredPrompt) {
+                installBtn.style.display = 'inline-flex';
+                installBtn.classList.add('show');
+            } else {
+                installBtn.classList.remove('show');
+                installBtn.style.display = 'none';
+            }
         }
 
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            // Ensure button is visible (in case it was hidden)
-            document.getElementById('installBtn').style.display = 'inline-flex';
+            checkInstallability();
         });
 
         window.addEventListener('appinstalled', () => {
             deferredPrompt = null;
-            document.getElementById('installBtn').style.display = 'none';
+            installBtn.classList.remove('show');
+            installBtn.style.display = 'none';
+            console.log('📲 App installed successfully!');
         });
 
         function installApp() {
             if (deferredPrompt) {
-                // Native install prompt
                 deferredPrompt.prompt();
                 deferredPrompt.userChoice.then((choiceResult) => {
                     if (choiceResult.outcome === 'accepted') {
-                        console.log('User accepted the install prompt');
+                        console.log('✅ User accepted the install prompt');
                     } else {
-                        console.log('User dismissed the install prompt');
+                        console.log('❌ User dismissed the install prompt');
                     }
                     deferredPrompt = null;
-                    // After prompt, we hide the button if installed or keep visible? 
-                    // We'll check again after.
-                    checkInstallability();
+                    installBtn.classList.remove('show');
+                    installBtn.style.display = 'none';
                 });
             } else {
-                // Fallback for browsers that don't support beforeinstallprompt (e.g., iOS Safari)
-                alert('To install this app on your device, use your browser\'s "Add to Home Screen" or "Install App" feature.');
+                // Fallback: show a message or open browser install flow
+                alert('Installation is not available right now. Try opening this page in Chrome or Edge and look for the install icon in the address bar.');
             }
         }
 
         // ─────────────────────────────────────────────────────────────
-        //  PWA: INLINE MANIFEST & SERVICE WORKER
+        //  PWA: MANIFEST & SERVICE WORKER
         // ─────────────────────────────────────────────────────────────
         (function registerPWA() {
-            // 1. Inline manifest as data URI (blob) — using the custom logo
+            // 1. Inline manifest with custom logo
             const manifestData = {
                 name: "Meal Planner Pro",
                 short_name: "Meal Planner",
@@ -1435,12 +1453,12 @@
             const manifestURL = URL.createObjectURL(manifestBlob);
             document.getElementById('manifestLink').href = manifestURL;
 
-            // 2. Service worker registration using a blob URL
+            // 2. Service worker
             if ('serviceWorker' in navigator) {
                 const swCode = `
                             self.addEventListener('install', function(e) {
                                 e.waitUntil(
-                                    caches.open('meal-planner-v1').then(function(cache) {
+                                    caches.open('meal-planner-v2').then(function(cache) {
                                         return cache.addAll([
                                             '/',
                                             '/index.html'
@@ -1459,13 +1477,13 @@
                 const swBlob = new Blob([swCode], { type: 'application/javascript' });
                 const swURL = URL.createObjectURL(swBlob);
                 navigator.serviceWorker.register(swURL)
-                    .then(() => console.log('Service Worker registered (blob)'))
-                    .catch(err => console.log('Service Worker registration failed:', err));
+                    .then(() => console.log('✅ Service Worker registered'))
+                    .catch(err => console.log('❌ Service Worker registration failed:', err));
             }
         })();
 
         // ─────────────────────────────────────────────────────────────
-        //  INIT: check session
+        //  INIT
         // ─────────────────────────────────────────────────────────────
         (function init() {
             const session = getSession();
